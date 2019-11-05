@@ -117,4 +117,18 @@ public interface TypeMapper {
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
     List<Type> selectByVideoId(Integer id);
+
+    @Select({
+            "select",
+            "typ.id, typ.type_name, typ.chinese_name, typ.type",
+            "from tb_type typ",
+            "where typ.type = #{type,jdbcType=INTEGER}"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="type_name", property="typeName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
+    })
+    List<Type> selectByType(int type);
 }

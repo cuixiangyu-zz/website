@@ -2,6 +2,7 @@ package com.cxy.website.service;
 
 import com.cxy.website.model.Picture;
 import com.cxy.website.model.Type;
+import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 
@@ -51,4 +52,6 @@ public interface TypeService {
     List<Type> findByPictureid(Integer id);
 
     List<Type> findByVideoId(Integer id);
+
+    PageInfo<Type> findByType(int pageNum, int pageSize,int type);
 }

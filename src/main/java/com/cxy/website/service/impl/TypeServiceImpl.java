@@ -1,8 +1,11 @@
 package com.cxy.website.service.impl;
 
 import com.cxy.website.dao.TypeMapper;
+import com.cxy.website.model.Actor;
 import com.cxy.website.model.Type;
 import com.cxy.website.service.TypeService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,5 +105,13 @@ public class TypeServiceImpl implements TypeService {
     public List<Type> findByVideoId(Integer id) {
         List<Type> types = typeMapper.selectByVideoId(id);
         return types;
+    }
+
+    @Override
+    public PageInfo<Type> findByType(int pageNum, int pageSize,int type) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Type> typeList = typeMapper.selectByType(type);
+        PageInfo<Type> page = new PageInfo<Type>(typeList);
+        return page;
     }
 }

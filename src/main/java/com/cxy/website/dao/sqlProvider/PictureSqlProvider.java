@@ -16,11 +16,7 @@ public class PictureSqlProvider {
         if (record.getName() != null) {
             sql.VALUES("name", "#{name,jdbcType=VARCHAR}");
         }
-        
-        if (record.getArtist() != null) {
-            sql.VALUES("artist", "#{artist,jdbcType=INTEGER}");
-        }
-        
+
         if (record.getPictureUrl() != null) {
             sql.VALUES("picture_url", "#{pictureUrl,jdbcType=VARCHAR}");
         }
@@ -67,11 +63,7 @@ public class PictureSqlProvider {
         if (record.getName() != null) {
             sql.SET("name = #{name,jdbcType=VARCHAR}");
         }
-        
-        if (record.getArtist() != null) {
-            sql.SET("artist = #{artist,jdbcType=INTEGER}");
-        }
-        
+
         if (record.getPictureUrl() != null) {
             sql.SET("picture_url = #{pictureUrl,jdbcType=VARCHAR}");
         }

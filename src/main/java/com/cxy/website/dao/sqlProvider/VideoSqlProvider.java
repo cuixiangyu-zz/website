@@ -16,11 +16,7 @@ public class VideoSqlProvider {
         if (record.getName() != null) {
             sql.VALUES("name", "#{name,jdbcType=VARCHAR}");
         }
-        
-        if (record.getActor() != null) {
-            sql.VALUES("actor", "#{actor,jdbcType=INTEGER}");
-        }
-        
+
         if (record.getVideoUrl() != null) {
             sql.VALUES("video_url", "#{videoUrl,jdbcType=VARCHAR}");
         }
@@ -59,11 +55,7 @@ public class VideoSqlProvider {
         if (record.getName() != null) {
             sql.SET("name = #{name,jdbcType=VARCHAR}");
         }
-        
-        if (record.getActor() != null) {
-            sql.SET("actor = #{actor,jdbcType=INTEGER}");
-        }
-        
+
         if (record.getVideoUrl() != null) {
             sql.SET("video_url = #{videoUrl,jdbcType=VARCHAR}");
         }
