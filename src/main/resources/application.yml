@@ -14,43 +14,43 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     platform: mysql
     type: com.alibaba.druid.pool.DruidDataSource
-    # ÏÂÃæÎªÁ¬½Ó³ØµÄ²¹³äÉèÖÃ£¬Ó¦ÓÃµ½ÉÏÃæËùÓĞÊı¾İÔ´ÖĞ
-    # ³õÊ¼»¯´óĞ¡£¬×îĞ¡£¬×î´ó
+    # ä¸‹é¢ä¸ºè¿æ¥æ± çš„è¡¥å……è®¾ç½®ï¼Œåº”ç”¨åˆ°ä¸Šé¢æ‰€æœ‰æ•°æ®æºä¸­
+    # åˆå§‹åŒ–å¤§å°ï¼Œæœ€å°ï¼Œæœ€å¤§
     initialSize: 5
     minIdle: 5
     maxActive: 20
-    # ÅäÖÃ»ñÈ¡Á¬½ÓµÈ´ı³¬Ê±µÄÊ±¼ä
+    # é…ç½®è·å–è¿æ¥ç­‰å¾…è¶…æ—¶çš„æ—¶é—´
     maxWait: 60000
-    # ÅäÖÃ¼ä¸ô¶à¾Ã²Å½øĞĞÒ»´Î¼ì²â£¬¼ì²âĞèÒª¹Ø±ÕµÄ¿ÕÏĞÁ¬½Ó£¬µ¥Î»ÊÇºÁÃë
+    # é…ç½®é—´éš”å¤šä¹…æ‰è¿›è¡Œä¸€æ¬¡æ£€æµ‹ï¼Œæ£€æµ‹éœ€è¦å…³é—­çš„ç©ºé—²è¿æ¥ï¼Œå•ä½æ˜¯æ¯«ç§’
     timeBetweenEvictionRunsMillis: 60000
-    # ÅäÖÃÒ»¸öÁ¬½ÓÔÚ³ØÖĞ×îĞ¡Éú´æµÄÊ±¼ä£¬µ¥Î»ÊÇºÁÃë
+    # é…ç½®ä¸€ä¸ªè¿æ¥åœ¨æ± ä¸­æœ€å°ç”Ÿå­˜çš„æ—¶é—´ï¼Œå•ä½æ˜¯æ¯«ç§’
     minEvictableIdleTimeMillis: 300000
     validationQuery: SELECT 1 FROM DUAL
     testWhileIdle: true
     testOnBorrow: false
     testOnReturn: false
-    # ´ò¿ªPSCache£¬²¢ÇÒÖ¸¶¨Ã¿¸öÁ¬½ÓÉÏPSCacheµÄ´óĞ¡
+    # æ‰“å¼€PSCacheï¼Œå¹¶ä¸”æŒ‡å®šæ¯ä¸ªè¿æ¥ä¸ŠPSCacheçš„å¤§å°
     poolPreparedStatements: true
     maxPoolPreparedStatementPerConnectionSize: 20
-    # ÅäÖÃ¼à¿ØÍ³¼ÆÀ¹½ØµÄfilters£¬È¥µôºó¼à¿Ø½çÃæsqlÎŞ·¨Í³¼Æ£¬'wall'ÓÃÓÚ·À»ğÇ½£¬´Ë´¦ÊÇfilterĞŞ¸ÄµÄµØ·½
+    # é…ç½®ç›‘æ§ç»Ÿè®¡æ‹¦æˆªçš„filtersï¼Œå»æ‰åç›‘æ§ç•Œé¢sqlæ— æ³•ç»Ÿè®¡ï¼Œ'wall'ç”¨äºé˜²ç«å¢™ï¼Œæ­¤å¤„æ˜¯filterä¿®æ”¹çš„åœ°æ–¹
     filters:
       commons-log.connection-logger-name: stat,wall,log4j
-      # Í¨¹ıconnectPropertiesÊôĞÔÀ´´ò¿ªmergeSql¹¦ÄÜ£»ÂıSQL¼ÇÂ¼
+      # é€šè¿‡connectPropertieså±æ€§æ¥æ‰“å¼€mergeSqlåŠŸèƒ½ï¼›æ…¢SQLè®°å½•
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-    # ºÏ²¢¶à¸öDruidDataSourceµÄ¼à¿ØÊı¾İ
+    # åˆå¹¶å¤šä¸ªDruidDataSourceçš„ç›‘æ§æ•°æ®
     useGlobalDataSourceStat: true
 
   mvc:
     static-path-pattern: /resources/**
   resources:
-    static-locations: classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:/E:/picture
+    static-locations: classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:K:/videos/japan/
 
   thymeleaf:
-    #Ä£°åµÄÄ£Ê½£¬Ö§³Ö HTML, XML TEXT JAVASCRIPT
+    #æ¨¡æ¿çš„æ¨¡å¼ï¼Œæ”¯æŒ HTML, XML TEXT JAVASCRIPT
     mode: HTML
-    #¿ª·¢ÅäÖÃÎªfalse,±ÜÃâĞŞ¸ÄÄ£°å»¹ÒªÖØÆô·şÎñÆ÷
+    #å¼€å‘é…ç½®ä¸ºfalse,é¿å…ä¿®æ”¹æ¨¡æ¿è¿˜è¦é‡å¯æœåŠ¡å™¨
     cache: false
-    #ÅäÖÃÄ£°åÂ·¾¶£¬Ä¬ÈÏÊÇtemplates£¬¿ÉÒÔ²»ÓÃÅäÖÃ
+    #é…ç½®æ¨¡æ¿è·¯å¾„ï¼Œé»˜è®¤æ˜¯templatesï¼Œå¯ä»¥ä¸ç”¨é…ç½®
     prefix: classpath:/templates
     suffix: .html
     servlet:
@@ -58,12 +58,12 @@ spring:
 
 mybatis:
   configuration:
-    map-underscore-to-camel-case: true #¿ªÆôÍÕ·åÓ³Éä
+    map-underscore-to-camel-case: true #å¼€å¯é©¼å³°æ˜ å°„
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 logging:
   level:
-    #´òÓ¡SQLĞÅÏ¢
+    #æ‰“å°SQLä¿¡æ¯
     com.intehel.dao: debug
 pagehelper:
   helperDialect: mysql
@@ -71,15 +71,15 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-#ÏµÍ³²Ù×÷ÈÕÖ¾¼ÇÂ¼ÔÚcontrollerÖĞ²Ù×÷ÀàĞÍ¶ÔÓ¦ÅäÖÃ
+#ç³»ç»Ÿæ“ä½œæ—¥å¿—è®°å½•åœ¨controllerä¸­æ“ä½œç±»å‹å¯¹åº”é…ç½®
 sysLog:
-  #controllerÖĞ²»½øĞĞÈÕÖ¾¼ÇÂ¼µÄ·½·¨Ãû¿ªÍ·
+  #controllerä¸­ä¸è¿›è¡Œæ—¥å¿—è®°å½•çš„æ–¹æ³•åå¼€å¤´
   exclude: select,find,list,get
-  #ĞÂÔö¶ÔÓ¦µÄ·½·¨Ãû¿ªÍ·
+  #æ–°å¢å¯¹åº”çš„æ–¹æ³•åå¼€å¤´
   insert: add,insert
-  #ĞŞ¸Ä¶ÔÓ¦µÄ·½·¨Ãû¿ªÍ·
+  #ä¿®æ”¹å¯¹åº”çš„æ–¹æ³•åå¼€å¤´
   update: update,save
-  #É¾³ı¶ÔÓ¦µÄ·½·¨Ãû¿ªÍ·
+  #åˆ é™¤å¯¹åº”çš„æ–¹æ³•åå¼€å¤´
   delete: del,remove
 
 swagger:
