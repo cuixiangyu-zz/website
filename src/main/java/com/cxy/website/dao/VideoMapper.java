@@ -1,6 +1,7 @@
 package com.cxy.website.dao;
 
 import com.cxy.website.dao.sqlProvider.VideoSqlProvider;
+import com.cxy.website.model.Picture;
 import com.cxy.website.model.Video;
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.annotations.Delete;
@@ -138,4 +139,44 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
     List<Video> selectByType(int type);
+
+    @Select({
+            "<script>",
+            "select",
+            "vio.id, vio.name,  vio.video_url, vio.cover_url, vio.creat_time, vio.creater, vio.type, ",
+            "vio.exist, vio.remark",
+            "from tb_video vio",
+            " left join tb_video_actor vioact on vio.id = vioact.video_id",
+            " left join tb_actor act on vioact.actor_id = act.id",
+            " left join tb_video_type viotyp on vio.id = viotyp.video_id",
+            " left join tb_type typ on viotyp.type_id = typ.id",
+            "where 1=1",
+            "<if test='types !=null'>",
+            "and typ.id in",
+            "<foreach collection='types' item='type'  open='(' separator=',' close=')'>",
+            "#{type}",
+            "</foreach>",
+            "</if>",
+            "<if test='actorName !=null'>",
+            "and act.id = #{actorName}",
+            "</if>",
+            "<if test='videoName !=null'>",
+            "and vio.name like '%#{videoName}%'",
+            "</if>",
+            "GROUP BY vio.id",
+            "</script>"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+
+            @Result(column="video_url", property="videoUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="cover_url", property="coverUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creat_time", property="creatTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="creater", property="creater", jdbcType=JdbcType.VARCHAR),
+            @Result(column="type", property="type", jdbcType=JdbcType.INTEGER),
+            @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
+            @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
+    })
+    List<Video> selectPageList(String actorName, String videoName, String language, List<String> types);
 }

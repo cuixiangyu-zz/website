@@ -54,4 +54,6 @@ public interface TypeService {
     List<Type> findByVideoId(Integer id);
 
     PageInfo<Type> findByType(int pageNum, int pageSize,int type);
+
+    List<Type> findByType(Integer type);
 }

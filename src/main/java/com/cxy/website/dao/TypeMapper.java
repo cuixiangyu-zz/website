@@ -107,7 +107,7 @@ public interface TypeMapper {
             "typ.id, typ.type_name, typ.chinese_name, typ.type",
             "from tb_type typ",
             "left join tb_video_type vidtyp on typ.id = vidtyp.type_id",
-            "left join tb_video vid on pictyp.video_id = vid.id",
+            "left join tb_video vid on vidtyp.video_id = vid.id",
             "where vid.id = #{id,jdbcType=INTEGER}"
     })
     @Results({

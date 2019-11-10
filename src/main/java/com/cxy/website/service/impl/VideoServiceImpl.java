@@ -1,14 +1,25 @@
 package com.cxy.website.service.impl;
 
+import com.cxy.website.common.CommonStatus;
+import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.VideoMapper;
+import com.cxy.website.model.Actor;
+import com.cxy.website.model.Picture;
+import com.cxy.website.model.Type;
 import com.cxy.website.model.Video;
+import com.cxy.website.service.ActorService;
+import com.cxy.website.service.TypeService;
 import com.cxy.website.service.VideoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: website
@@ -22,6 +33,11 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     VideoMapper videoMapper;
 
+    @Autowired
+    TypeService typeService;
+
+    @Autowired
+    ActorService actorService;
     /**
      * 添加
      *
@@ -108,5 +124,97 @@ public class VideoServiceImpl implements VideoService {
         List<Video> video = videoMapper.selectByType(type);
         PageInfo<Video> page = new PageInfo<Video>(video);
         return page;
+    }
+
+    /**
+     * 条件查询视频
+     *
+     * @param pageNum     页码
+     * @param pageSize    但也数量
+     * @param actorName   作者名
+     * @param videoName 图片名
+     * @param types       类型
+     * @return jsondata
+     */
+    @Override
+    public JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String videoName, String language, List<List<Object>> types) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<String> type = null;
+        if(types!=null&&types.size()>0){
+            type = new ArrayList<>();
+            for (List<Object> typelist : types) {
+
+                if(typelist.get(1)!=null){
+                    type.add(typelist.get(1).toString());
+                }
+            }
+        }
+
+        List<Video> videos = videoMapper.selectPageList(actorName, videoName, language, type);
+        for (Video video : videos) {
+            video = getVideo(video, video.getId());
+        }
+        PageInfo<Video> page = new PageInfo<Video>(videos);
+        List<Type> alltypes = typeService.findByType(CommonStatus.TYPE_TYPE_JAPAN);
+        List<Actor> actors = actorService.findByType(CommonStatus.ACTOR_TYPE_JAPAN);
+        Map<String, Object> jsondata = getTypeList(alltypes, type);
+        jsondata.put("PageInfo",page);
+        jsondata.put("actors",actors);
+        return JsonData.buildSuccess(jsondata);
+    }
+
+    public Map<String, Object> getTypeList(List<Type> allTypes, List<String> selectTypes) {
+        if (allTypes == null) {
+            return null;
+        }
+        List<Map> childList = new ArrayList<>();
+        Map<String, Object> typeMap = new HashMap<>();
+        typeMap.put("value", "allTypes");
+        typeMap.put("label", "类型");
+        typeMap.put("multiple", "true");
+        List<Map<String, Object>> typeList = new ArrayList<>();
+
+        for (Type type : allTypes) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("value", type.getId());
+            info.put("label", type.getChineseName());
+            info.put("multiple", "true");
+            if (selectTypes!=null&&selectTypes.contains(type.getChineseName())) {
+                info.put("checked", true);
+            } else {
+                info.put("checked", false);
+            }
+            typeList.add(info);
+        }
+        typeMap.put("children", typeList);
+        List<Map<String, Object>> typelist = new ArrayList<>();
+        typelist.add(typeMap);
+        Map<String, Object> jsondata = new HashMap<>();
+        jsondata.put("typeMap", typelist);
+        return jsondata;
+    }
+
+    public Video getVideo(Video video, Integer id) {
+
+        List<Actor> actors = actorService.findByVideoid(id);
+        List<Type> types = typeService.findByVideoId(id);
+        video.setActors(actors);
+        video.setTypes(types);
+        video.setCoverUrl(CommonStatus.FILE_URL_PREFIX+video.getCoverUrl());
+        String address = CommonStatus.FILE_ADDRESS_PREFIX+video.getVideoUrl();
+        File root = new File(address);
+        List<String> piclist = new ArrayList<>();
+        if(root.isFile()){
+            piclist.add(CommonStatus.FILE_URL_PREFIX+video.getVideoUrl());
+        }else if(root.isDirectory()){
+            File[] files = root.listFiles();
+
+            for (File picfile : files) {
+                piclist.add(CommonStatus.FILE_URL_PREFIX+video.getVideoUrl()+File.separator+picfile.getName());
+            }
+        }
+
+        video.setAddress(piclist);
+        return video;
     }
 }

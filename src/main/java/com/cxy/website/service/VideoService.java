@@ -1,8 +1,11 @@
 package com.cxy.website.service;
 
+import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.Util;
 import com.cxy.website.model.Video;
 import com.github.pagehelper.PageInfo;
+
+import java.util.List;
 
 public interface VideoService {
     /**
@@ -57,4 +60,6 @@ public interface VideoService {
      * @return
      */
     PageInfo<Video> findByType(int pageNum, int pageSize,int type);
+
+    JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types);
 }
