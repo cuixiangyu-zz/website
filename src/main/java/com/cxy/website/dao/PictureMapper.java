@@ -175,4 +175,48 @@ public interface PictureMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
     List<Picture> selectByLanguage(String language);
+
+    @Select({
+            "<script>",
+            "select",
+            "pic.id, pic.name,  pic.picture_url, pic.cover_url, pic.creat_time, pic.creater, pic.type, pic.number, ",
+            "pic.language, pic.exist, pic.remark",
+            "from tb_picture pic",
+            " left join tb_picture_actor picact on pic.id = picact.picture_id",
+            " left join tb_actor act on picact.actor_id = act.id",
+            " left join tb_picture_type pictyp on pic.id = pictyp.picture_id",
+            " left join tb_type typ on pictyp.type_id = typ.id",
+            "where 1=1",
+            "<if test='types !=null'>",
+            "and typ.id in",
+            "<foreach collection='types' item='type'  open='(' separator=',' close=')'>",
+            "#{type}",
+            "</foreach>",
+            "</if>",
+            "<if test='actorName !=null'>",
+            "and act.id = #{actorName}",
+            "</if>",
+            "<if test='pictureName !=null'>",
+            "and pic.name = #{pictureName}",
+            "</if>",
+            "<if test='language !=null'>",
+            "and pic.language = #{language}",
+            "</if>",
+            "GROUP BY pic.id",
+            "</script>"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+            @Result(column="picture_url", property="pictureUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="cover_url", property="coverUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creat_time", property="creatTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="creater", property="creater", jdbcType=JdbcType.VARCHAR),
+            @Result(column="type", property="type", jdbcType=JdbcType.INTEGER),
+            @Result(column="number", property="number", jdbcType=JdbcType.INTEGER),
+            @Result(column="language", property="language", jdbcType=JdbcType.VARCHAR),
+            @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
+            @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
+    })
+    List<Picture> selectPageList(String actorName, String pictureName,String language, List<String> types);
 }

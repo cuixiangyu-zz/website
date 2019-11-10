@@ -2,13 +2,12 @@ package com.cxy.website.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Picture implements Serializable {
     private Integer id;
 
     private String name;
-
-
 
     private String pictureUrl;
 
@@ -27,6 +26,38 @@ public class Picture implements Serializable {
     private Integer exist;
 
     private String remark;
+
+    private List<Actor> actors;
+
+    private List<Type> types;
+
+    private List<String> address;
+
+    public List<String> getAddress() {
+        return address;
+    }
+
+    public void setAddress(List<String> address) {
+        this.address = address;
+    }
+
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public List<Type> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<Type> types) {
+        this.types = types;
+    }
+
+
 
     private static final long serialVersionUID = 1L;
 

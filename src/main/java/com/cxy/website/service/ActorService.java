@@ -80,4 +80,6 @@ public interface ActorService {
     List<Actor> findByVideoid(Integer id);
 
     PageInfo<Actor> findAll(int pageNum, int pageSize);
+
+    List<Actor> findByType(Integer type);
 }

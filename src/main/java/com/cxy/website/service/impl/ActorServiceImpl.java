@@ -168,4 +168,10 @@ public class ActorServiceImpl implements ActorService {
         PageInfo<Actor> page = new PageInfo<Actor>(actors);
         return page;
     }
+
+    @Override
+    public List<Actor> findByType(Integer type) {
+        List<Actor> actors = actorMapper.selectAll();
+        return actors;
+    }
 }

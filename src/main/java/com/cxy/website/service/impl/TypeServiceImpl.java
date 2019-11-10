@@ -114,4 +114,10 @@ public class TypeServiceImpl implements TypeService {
         PageInfo<Type> page = new PageInfo<Type>(typeList);
         return page;
     }
+
+    @Override
+    public List<Type> findByType(Integer type) {
+        List<Type> typeList = typeMapper.selectByType(type);
+        return typeList;
+    }
 }

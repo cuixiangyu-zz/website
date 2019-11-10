@@ -1,5 +1,7 @@
 package com.cxy.website.controller;
 
+import com.cxy.website.common.CommonStatus;
+import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Picture;
 import com.cxy.website.model.PictureDetil;
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -142,14 +146,76 @@ public class PictureController {
      */
     @RequestMapping(value = "/getDetil" , method = RequestMethod.GET)
     @ResponseBody
-    public PictureDetil getDetil(@RequestParam Integer id){
-        PictureDetil pictureDetil= new PictureDetil();
+    public JsonData getDetil(@RequestParam Integer id){
         Picture picture = pictureService.findById(id);
-        List<Actor> actors = actorService.findByPictureid(id);
-        List<Type> types = typeService.findByPictureid(id);
-        pictureDetil.setPicture(picture);
-        pictureDetil.setActors(actors);
-        pictureDetil.setTypes(types);
-        return pictureDetil;
+        picture = pictureService.getPicture(picture,id);
+        return JsonData.buildSuccess(picture);
+    }
+
+
+
+    @RequestMapping(value = "/getPageList" , method = RequestMethod.POST)
+    @ResponseBody
+    public JsonData getPageList(@RequestBody QueryData queryData){
+        JsonData jsonData = pictureService.findPageList(queryData.getPageNum(),queryData.getPageSize(),queryData.getActorName(),queryData.getPictureName(),queryData.getLanguage(),queryData.getTypes());
+        return jsonData;
+    }
+
+    static class QueryData {
+        Integer pageNum;
+        Integer pageSize;
+        String actorName;
+        String pictureName;
+        String language;
+
+        public String getLanguage() {
+            return language;
+        }
+
+        public void setLanguage(String language) {
+            this.language = language;
+        }
+
+        List<List<Object>> types;
+
+        public Integer getPageNum() {
+            return pageNum;
+        }
+
+        public void setPageNum(Integer pageNum) {
+            this.pageNum = pageNum;
+        }
+
+        public Integer getPageSize() {
+            return pageSize;
+        }
+
+        public void setPageSize(Integer pageSize) {
+            this.pageSize = pageSize;
+        }
+
+        public String getActorName() {
+            return actorName;
+        }
+
+        public void setActorName(String actorName) {
+            this.actorName = actorName;
+        }
+
+        public String getPictureName() {
+            return pictureName;
+        }
+
+        public void setPictureName(String pictureName) {
+            this.pictureName = pictureName;
+        }
+
+        public List<List<Object>> getTypes() {
+            return types;
+        }
+
+        public void setTypes(List<List<Object>> types) {
+            this.types = types;
+        }
     }
 }
