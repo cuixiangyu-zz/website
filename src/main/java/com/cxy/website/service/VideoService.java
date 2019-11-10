@@ -62,4 +62,6 @@ public interface VideoService {
     PageInfo<Video> findByType(int pageNum, int pageSize,int type);
 
     JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types);
+
+    Video getVideo(Video video, Integer id);
 }

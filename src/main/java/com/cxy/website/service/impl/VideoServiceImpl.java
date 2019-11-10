@@ -194,6 +194,7 @@ public class VideoServiceImpl implements VideoService {
         return jsondata;
     }
 
+    @Override
     public Video getVideo(Video video, Integer id) {
 
         List<Actor> actors = actorService.findByVideoid(id);

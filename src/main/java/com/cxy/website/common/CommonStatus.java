@@ -33,6 +33,6 @@ public class CommonStatus {
     public static final Integer TYPE_TYPE_AMERICAN = 2;
     public static final Integer TYPE_TYPE_PICTURE = 3;
 
-    public static final String FILE_ADDRESS_PREFIX = "E:\\picture";
-    public static final String FILE_URL_PREFIX = "http://127.0.0.1:8081/website/resources";
+    public static final String FILE_ADDRESS_PREFIX = "K:";
+    public static final String FILE_URL_PREFIX = "http://127.0.0.1:8081/website";
 }

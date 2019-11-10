@@ -28,7 +28,7 @@ public class Getvideo {
         List<String> american = new ArrayList<>();
         Map<String,List<String>> videos = new HashMap<>();
 
-        File file = new File("K:\\videos");
+        File file = new File("K:\\resources");
         File[] files = file.listFiles();
         for (File file1 : files) {
             if("japan".equals(file1.getName())){

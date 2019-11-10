@@ -171,7 +171,7 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public List<Actor> findByType(Integer type) {
-        List<Actor> actors = actorMapper.selectAll();
+        List<Actor> actors = actorMapper.selectByType(type);
         return actors;
     }
 }

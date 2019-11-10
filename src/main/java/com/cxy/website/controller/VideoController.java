@@ -84,15 +84,11 @@ public class VideoController {
 
     @RequestMapping(value = "/getDetile",method = RequestMethod.GET)
     @ResponseBody
-    public VideoDetile getDetile(@RequestParam Integer id){
-        VideoDetile videoDetile = new VideoDetile();
+    public JsonData getDetile(@RequestParam Integer id){
+
         Video videos = videoService.findByid(id);
-        List<Type> typeList =  typeService.findByVideoId(id);
-        List<Actor> actorList = actorService.findByVideoid(id);
-        videoDetile.setTypeList(typeList);
-        videoDetile.setActorList(actorList);
-        videoDetile.setVideo(videos);
-        return videoDetile;
+        videos = videoService.getVideo(videos, id);
+        return JsonData.buildSuccess(videos);
     }
 
     @RequestMapping(value = "/getPageList" , method = RequestMethod.POST)
