@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/jquery.js"></script>
+    <meta charset="UTF-8">
+    <title>电影列表</title>
+</head>
+<body>
+<div id = "japan">
+    <h3>日本</h3>
+</div>
+<div id = "american">
+    <h3>欧美</h3>
+</div>
+
+</body>
+<script>
+    $(function(){
+        $.ajax({
+            url:"/get",
+            type:"get",
+            datatype:"json",
+            data:"",
+            success:function(data){
+
+                for(var i = 0 ;i< data.japan.length;i++){
+                    var html = "<a href = http://192.168.1.23:8081/japan/" + data.japan[i]+ ">"+data.japan[i]+"</a><div/>";
+                    $("#japan").append(html);
+                }
+                for(var i = 0 ;i< data.american.length;i++){
+                    var html = "<a href = http://192.168.1.23:8081/american/" + data.american[i]+ ">"+data.american[i]+"</a><div/>";
+                    $("#american").append(html);
+                }
+
+            },
+            error:function(){
+
+            }
+        })
+    });
+</script>
+</html>
