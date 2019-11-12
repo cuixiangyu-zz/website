@@ -82,4 +82,6 @@ public interface ActorService {
     PageInfo<Actor> findAll(int pageNum, int pageSize);
 
     List<Actor> findByType(Integer type);
+
+    void updateVideoActor(Integer id, List<String> artists);
 }

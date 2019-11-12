@@ -1,6 +1,8 @@
 package com.cxy.website.service.impl;
 
 import com.cxy.website.dao.ActorMapper;
+import com.cxy.website.dao.ActorTypeMapper;
+import com.cxy.website.dao.VideoActorMapper;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Video;
 import com.cxy.website.service.ActorService;
@@ -22,6 +24,9 @@ public class ActorServiceImpl implements ActorService {
 
     @Autowired
     ActorMapper actorMapper;
+
+    @Autowired
+    VideoActorMapper videoActorMapper;
 
     /**
      * 添加
@@ -173,5 +178,10 @@ public class ActorServiceImpl implements ActorService {
     public List<Actor> findByType(Integer type) {
         List<Actor> actors = actorMapper.selectByType(type);
         return actors;
+    }
+
+    @Override
+    public void updateVideoActor(Integer id, List<String> artists) {
+        videoActorMapper.updateVideoActor(id,artists);
     }
 }

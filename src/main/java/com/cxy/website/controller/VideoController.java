@@ -98,6 +98,13 @@ public class VideoController {
         return jsonData;
     }
 
+    @RequestMapping(value = "/sysTools" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData sysTools(){
+        videoService.updateVideoFromLocal("F:\\sqte220/SQTE-220.mp4");
+        return JsonData.buildSuccess();
+    }
+
     static class QueryData {
         Integer pageNum;
         Integer pageSize;
@@ -112,8 +119,6 @@ public class VideoController {
         public void setLanguage(String language) {
             this.language = language;
         }
-
-
 
         public Integer getPageNum() {
             return pageNum;

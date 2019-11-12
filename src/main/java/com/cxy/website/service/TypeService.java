@@ -56,4 +56,8 @@ public interface TypeService {
     PageInfo<Type> findByType(int pageNum, int pageSize,int type);
 
     List<Type> findByType(Integer type);
+
+    void updateVideoType(int videoId , List<String> typeName);
+
+    void updatePicType(int picId , List<String> typeName);
 }

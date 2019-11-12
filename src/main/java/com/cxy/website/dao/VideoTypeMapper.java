@@ -12,6 +12,8 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
+import java.util.List;
+
 public interface VideoTypeMapper {
     @Delete({
         "delete from tb_video_type",
@@ -53,4 +55,16 @@ public interface VideoTypeMapper {
         "where id = #{id,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(VideoType record);
+
+    @Insert({
+            "<script>",
+            "insert into tb_video_type (video_id,type_id) ",
+            "select #{videoId},typ.id from tb_type typ where typ.type_name in ",
+            "<foreach item='type' index='index' collection='typeName'",
+            "  open='(' separator=',' close=')'>\n",
+            "    #{type}\n",
+            "</foreach>",
+            "</script>"
+    })
+    void updateVideoType(int videoId, List<String> typeName);
 }

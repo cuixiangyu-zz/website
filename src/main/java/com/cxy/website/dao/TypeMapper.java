@@ -131,4 +131,5 @@ public interface TypeMapper {
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
     List<Type> selectByType(int type);
+
 }

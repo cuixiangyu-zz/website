@@ -10,16 +10,14 @@ import com.cxy.website.model.Video;
 import com.cxy.website.service.ActorService;
 import com.cxy.website.service.TypeService;
 import com.cxy.website.service.VideoService;
+import com.cxy.website.service.WebSiteToolsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @program: website
@@ -38,6 +36,9 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     ActorService actorService;
+
+    @Autowired
+    WebSiteToolsService webSiteToolsService;
     /**
      * 添加
      *
@@ -217,5 +218,66 @@ public class VideoServiceImpl implements VideoService {
 
         video.setAddress(piclist);
         return video;
+    }
+
+    /**
+     * 将本地文件信息保存到数据库
+     * @param localAddress 文件地址
+     */
+    @Override
+    public void updateVideoFromLocal(String localAddress){
+        File file = new File(localAddress);
+        if(file.exists()&&file.isFile()){
+            Video video = new Video();
+            String filename = file.getName().substring(0,file.getName().indexOf("."));
+
+            //从网页获取视频基本信息
+            Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename);
+            if(videoinfo==null){
+                return;
+            }
+            List<String> artists = (List)videoinfo.get("artists");
+
+            //移动视频文件到对应演员的文件夹
+            if(artists.size()==1){
+                String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
+                        artists.get(0)+File.separator+file.getName();
+                webSiteToolsService.moveFiles(localAddress,targetPath);
+                video.setVideoUrl(File.separator+"japancideo"+File.separator+
+                        artists.get(0)+File.separator+file.getName());
+            }else{
+                String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
+                        "多作者"+File.separator+file.getName();
+                webSiteToolsService.moveFiles(localAddress,targetPath);
+                video.setVideoUrl(File.separator+"japancideo"+File.separator+
+                        "多作者"+File.separator+file.getName());
+            }
+
+            //下载视频封面
+            if(videoinfo.get("picurl")!=null){
+                String picname = webSiteToolsService.downloadPics(videoinfo.get("picurl").toString(), CommonStatus.FILE_COVER_PREFIX + File.separator +
+                        "japanVideoCover", filename);
+                video.setCoverUrl(File.separator +
+                        "japanVideoCover"+File.separator+picname);
+            }
+
+            video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
+            video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+            video.setName(videoinfo.get("title")==null?filename:videoinfo.get("title").toString());
+            video.setCreatTime(new Date());
+            add(video);
+            Video video1 = findByName(video.getName());
+            if(videoinfo.get("category")!=null){
+                typeService.updateVideoType(video1.getId(),(List<String>)videoinfo.get("category"));
+            }
+            if(videoinfo.get("artists")!=null){
+                actorService.updateVideoActor(video1.getId(),(List<String>)videoinfo.get("artists"));
+            }
+        }else if(file.exists()&&file.isDirectory()){
+            File[] listFiles = file.listFiles();
+            for (File listFile : listFiles) {
+                updateVideoFromLocal(listFile.getPath());
+            }
+        }
     }
 }

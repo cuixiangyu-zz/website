@@ -1,6 +1,7 @@
 package com.cxy.website.service.impl;
 
 import com.cxy.website.dao.TypeMapper;
+import com.cxy.website.dao.VideoTypeMapper;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Type;
 import com.cxy.website.service.TypeService;
@@ -22,6 +23,9 @@ public class TypeServiceImpl implements TypeService {
 
     @Autowired
     TypeMapper typeMapper;
+
+    @Autowired
+    VideoTypeMapper videoTypeMapper;
 
     /**
      * 添加
@@ -119,5 +123,15 @@ public class TypeServiceImpl implements TypeService {
     public List<Type> findByType(Integer type) {
         List<Type> typeList = typeMapper.selectByType(type);
         return typeList;
+    }
+
+    @Override
+    public void updateVideoType(int videoId, List<String> typeName) {
+        videoTypeMapper.updateVideoType(videoId,typeName);
+    }
+
+    @Override
+    public void updatePicType(int picId, List<String> typeName) {
+
     }
 }

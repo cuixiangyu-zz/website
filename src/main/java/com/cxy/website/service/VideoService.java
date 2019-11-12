@@ -64,4 +64,10 @@ public interface VideoService {
     JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types);
 
     Video getVideo(Video video, Integer id);
+
+    /**
+     * 将本地文件信息保存到数据库
+     * @param localAddress 文件地址
+     */
+    void updateVideoFromLocal(String localAddress);
 }
