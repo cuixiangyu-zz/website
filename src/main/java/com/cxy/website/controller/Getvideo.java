@@ -26,6 +26,7 @@ public class Getvideo {
 
         List<String> japan = new ArrayList<>();
         List<String> american = new ArrayList<>();
+        List<String> suggest = new ArrayList<>();
         Map<String,List<String>> videos = new HashMap<>();
 
         File file = new File("K:\\resources");
@@ -43,10 +44,16 @@ public class Getvideo {
                     american.add(files1[i].getName());
                 }
             }
+            if("suggest".equals(file1.getName())){
+                File[] files1 = file1.listFiles();
+                for (int i = 0; i < files1.length; i++) {
+                    suggest.add(files1[i].getName());
+                }
+            }
         }
         videos.put("japan",japan);
         videos.put("american",american);
-
+        videos.put("suggest",suggest);
         return videos;
     }
 

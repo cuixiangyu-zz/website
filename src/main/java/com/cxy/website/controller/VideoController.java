@@ -101,7 +101,7 @@ public class VideoController {
     @RequestMapping(value = "/sysTools" , method = RequestMethod.GET)
     @ResponseBody
     public JsonData sysTools(){
-        videoService.updateVideoFromLocal("F:\\sqte220/SQTE-220.mp4");
+        videoService.updateVideoFromLocal("K:\\resources\\japan");
         return JsonData.buildSuccess();
     }
 

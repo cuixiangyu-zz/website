@@ -24,6 +24,7 @@ public class CommonStatus {
 
     public static final Integer VIDEO_TYPE_JAPAN = 1;
     public static final Integer VIDEO_TYPE_AMERICAN = 2;
+    public static final Integer VIDEO_TYPE_COMIC = 3;
 
     public static final Integer VIDEO_EXIST_EXIST = 1;
     public static final Integer VIDEO_EXIST_DELETE = 2;
@@ -33,7 +34,7 @@ public class CommonStatus {
     public static final Integer TYPE_TYPE_AMERICAN = 2;
     public static final Integer TYPE_TYPE_PICTURE = 3;
 
-    public static final String FILE_ADDRESS_PREFIX = "E:/picture";
+    public static final String FILE_ADDRESS_PREFIX = "K:/resources";
     public static final String FILE_URL_PREFIX = "http://127.0.0.1:8081/website/resources";
-    public static final String FILE_COVER_PREFIX = "E:/cover";
+    public static final String FILE_COVER_PREFIX = "G:/COVER";
 }

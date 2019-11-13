@@ -97,6 +97,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/resources/**", "anon");
         filterChainDefinitionMap.put("/api/**", "anon");
         filterChainDefinitionMap.put("/getVerifyCode", "anon");
+        filterChainDefinitionMap.put("/videos", "anon");
+        filterChainDefinitionMap.put("/get", "anon");
 
         filterChainDefinitionMap.put("/css/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");

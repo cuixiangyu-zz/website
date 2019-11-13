@@ -233,23 +233,36 @@ public class VideoServiceImpl implements VideoService {
 
             //从网页获取视频基本信息
             Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename);
-            if(videoinfo==null){
+            if(videoinfo==null||videoinfo.get("title")==null||videoinfo.get("title")==""){
                 return;
             }
             List<String> artists = (List)videoinfo.get("artists");
 
+            if(artists!=null&&artists.size()>0){
+                for (String artist : artists) {
+                    Actor actor = actorService.findByName(artist);
+                    if(actor==null){
+                        Actor actor1 = new Actor();
+                        actor1.setName(artist);
+                        actor1.setChineseName(artist);
+                        actor1.setType(CommonStatus.ACTOR_TYPE_JAPAN);
+                        actor1.setCreatTime(new Date());
+                        actorService.add(actor1);
+                    }
+                }
+            }
             //移动视频文件到对应演员的文件夹
             if(artists.size()==1){
                 String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
                         artists.get(0)+File.separator+file.getName();
                 webSiteToolsService.moveFiles(localAddress,targetPath);
-                video.setVideoUrl(File.separator+"japancideo"+File.separator+
+                video.setVideoUrl(File.separator+"japanvideo"+File.separator+
                         artists.get(0)+File.separator+file.getName());
             }else{
                 String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
                         "多作者"+File.separator+file.getName();
                 webSiteToolsService.moveFiles(localAddress,targetPath);
-                video.setVideoUrl(File.separator+"japancideo"+File.separator+
+                video.setVideoUrl(File.separator+"japanvideo"+File.separator+
                         "多作者"+File.separator+file.getName());
             }
 
@@ -267,10 +280,10 @@ public class VideoServiceImpl implements VideoService {
             video.setCreatTime(new Date());
             add(video);
             Video video1 = findByName(video.getName());
-            if(videoinfo.get("category")!=null){
+            if(videoinfo.get("category")!=null&&((List) videoinfo.get("category")).size()>0){
                 typeService.updateVideoType(video1.getId(),(List<String>)videoinfo.get("category"));
             }
-            if(videoinfo.get("artists")!=null){
+            if(videoinfo.get("artists")!=null&&((List) videoinfo.get("artists")).size()>0){
                 actorService.updateVideoActor(video1.getId(),(List<String>)videoinfo.get("artists"));
             }
         }else if(file.exists()&&file.isDirectory()){
