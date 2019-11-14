@@ -104,7 +104,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/img/**", "anon");
         filterChainDefinitionMap.put("/vendor/**", "anon");
-
+        filterChainDefinitionMap.put("/video/saveinfo", "anon");
         filterChainDefinitionMap.put("/doctorManage/**","anon");//放行医生登录的相关请求
 
 

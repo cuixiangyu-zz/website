@@ -108,7 +108,7 @@ public class VideoController {
     }
 
     @CrossOrigin
-    @RequestMapping("saveinfo")
+    @RequestMapping("/saveinfo")
     @ResponseBody
     public JsonData saveinfo(HttpServletRequest request, @RequestParam String title,
                            @RequestParam String picurl, @RequestParam String id, @RequestParam String arrayurl){

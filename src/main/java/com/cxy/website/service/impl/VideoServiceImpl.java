@@ -337,16 +337,16 @@ public class VideoServiceImpl implements VideoService {
             }
 
             video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
-            video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+            video.setExist(CommonStatus.VIDEO_EXIST_NOTINDATABASE);
             video.setName(title);
             video.setCreatTime(new Date());
             add(video);
             Video video1 = findByName(video.getName());
-            if (name.size()>0) {
-                typeService.updateVideoType(video1.getId(), name);
-            }
             if (category.size()>0) {
-                actorService.updateVideoActor(video1.getId(),category);
+                typeService.updateVideoType(video1.getId(), category);
+            }
+            if (name.size()>0) {
+                actorService.updateVideoActor(video1.getId(),name);
             }
         }catch (Exception e){
             System.out.println(e.getMessage());

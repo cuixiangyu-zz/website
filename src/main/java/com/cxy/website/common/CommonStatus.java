@@ -35,6 +35,6 @@ public class CommonStatus {
     public static final Integer TYPE_TYPE_PICTURE = 3;
 
     public static final String FILE_ADDRESS_PREFIX = "K:/resources";
-    public static final String FILE_URL_PREFIX = "http://127.0.0.1:8081/website/resources";
+    public static final String FILE_URL_PREFIX = "http://192.168.1.23:8081/website/resources";
     public static final String FILE_COVER_PREFIX = "G:/COVER";
 }
