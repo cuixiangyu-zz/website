@@ -1,5 +1,6 @@
 package com.cxy.website.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.VideoMapper;
@@ -268,10 +269,10 @@ public class VideoServiceImpl implements VideoService {
 
             //下载视频封面
             if(videoinfo.get("picurl")!=null){
-                String picname = webSiteToolsService.downloadPics(videoinfo.get("picurl").toString(), CommonStatus.FILE_COVER_PREFIX + File.separator +
+                webSiteToolsService.downloadPics(videoinfo.get("picurl").toString(), CommonStatus.FILE_COVER_PREFIX + File.separator +
                         "japanVideoCover", filename);
                 video.setCoverUrl(File.separator +
-                        "japanVideoCover"+File.separator+picname);
+                        "japanVideoCover"+File.separator+filename + ".jpg");
             }
 
             video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
@@ -291,6 +292,64 @@ public class VideoServiceImpl implements VideoService {
             for (File listFile : listFiles) {
                 updateVideoFromLocal(listFile.getPath());
             }
+        }
+    }
+
+    @Override
+    public void saveNotDownloadInfo(String title, String picurl, String id, String arrayurl) {
+        try {
+            Video video = new Video();
+            JSONArray json = JSONArray.parseArray(arrayurl); // 首先把字符串转成 JSONArray  对象
+            List<String> name = new ArrayList<>();
+            List<String> category = new ArrayList<>();
+
+            if (json.size() > 0) {
+                for (int i = 0; i < json.size(); i++) {
+
+                    String html = json.get(i).toString();// 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                    if (html.indexOf("star") > 0) {
+                        name.add(html.substring(html.indexOf(",\"") + 2, html.length() - 2)) ;
+                    } else if (html.indexOf("genre") > 0) {
+                        category.add(html.substring(html.indexOf("genre") + 6, html.indexOf("\",")));
+                    }
+                    System.out.println();  // 得到 每个对象中的属性值
+                }
+            }
+            if(name!=null&&name.size()>0){
+                for (String artist : name) {
+                    Actor actor = actorService.findByName(artist);
+                    if(actor==null){
+                        Actor actor1 = new Actor();
+                        actor1.setName(artist);
+                        actor1.setChineseName(artist);
+                        actor1.setType(CommonStatus.ACTOR_TYPE_JAPAN);
+                        actor1.setCreatTime(new Date());
+                        actorService.add(actor1);
+                    }
+                }
+            }
+            //下载视频封面
+            if (picurl != "") {
+                webSiteToolsService.downloadPics(picurl, CommonStatus.FILE_COVER_PREFIX + File.separator +
+                        "japanVideoCover", id);
+                video.setCoverUrl(File.separator +
+                        "japanVideoCover" + File.separator + id + ".jpg");
+            }
+
+            video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
+            video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+            video.setName(title);
+            video.setCreatTime(new Date());
+            add(video);
+            Video video1 = findByName(video.getName());
+            if (name.size()>0) {
+                typeService.updateVideoType(video1.getId(), name);
+            }
+            if (category.size()>0) {
+                actorService.updateVideoActor(video1.getId(),category);
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
         }
     }
 }

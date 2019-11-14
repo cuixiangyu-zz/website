@@ -70,4 +70,13 @@ public interface VideoService {
      * @param localAddress 文件地址
      */
     void updateVideoFromLocal(String localAddress);
+
+    /**
+     * 保存未下载影片信息
+     * @param title 标题
+     * @param picurl    图片url
+     * @param id    id
+     * @param arrayurl  分类和作者
+     */
+    void saveNotDownloadInfo(String title,String picurl,String id,String arrayurl);
 }

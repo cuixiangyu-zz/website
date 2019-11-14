@@ -1,5 +1,6 @@
 package com.cxy.website.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Type;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -104,6 +106,18 @@ public class VideoController {
         videoService.updateVideoFromLocal("K:\\resources\\japan");
         return JsonData.buildSuccess();
     }
+
+    @CrossOrigin
+    @RequestMapping("saveinfo")
+    @ResponseBody
+    public JsonData saveinfo(HttpServletRequest request, @RequestParam String title,
+                           @RequestParam String picurl, @RequestParam String id, @RequestParam String arrayurl){
+
+        videoService.saveNotDownloadInfo(title, picurl, id, arrayurl);
+        return JsonData.buildSuccess();
+    }
+
+
 
     static class QueryData {
         Integer pageNum;
