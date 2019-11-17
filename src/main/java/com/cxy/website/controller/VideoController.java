@@ -1,11 +1,7 @@
 package com.cxy.website.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.cxy.website.common.util.web.JsonData;
-import com.cxy.website.model.Actor;
-import com.cxy.website.model.Type;
-import com.cxy.website.model.Video;
-import com.cxy.website.model.VideoDetile;
+import com.cxy.website.model.*;
 import com.cxy.website.service.ActorService;
 import com.cxy.website.service.TypeService;
 import com.cxy.website.service.VideoService;
@@ -15,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -100,11 +97,17 @@ public class VideoController {
         return jsonData;
     }
 
-    @RequestMapping(value = "/sysTools" , method = RequestMethod.GET)
+    @RequestMapping(value = "/selectfile" , method = RequestMethod.GET)
     @ResponseBody
-    public JsonData sysTools(){
-        videoService.updateVideoFromLocal("K:\\resources\\japan");
-        return JsonData.buildSuccess();
+    public JsonData selectfile(@RequestParam String source){
+        /*File file = new File(source);
+        for (File listFile : file.listFiles()) {
+            for (File file1 : listFile.listFiles()) {
+                file1.renameTo(new File("L:\\resources"+File.separator+file1.getName()));
+            }
+        }*/
+        List<UpdateFileName> updateFileNames = videoService.selectfile(source);
+        return JsonData.buildSuccess(updateFileNames);
     }
 
     @CrossOrigin
@@ -117,7 +120,14 @@ public class VideoController {
         return JsonData.buildSuccess();
     }
 
+    @RequestMapping(value = "/updatefile" , method = RequestMethod.POST)
+    @ResponseBody
+    public JsonData updatefile(@RequestBody Updatefile updatefile){
 
+        videoService.updateVideoFromLocal(updatefile.getSource(),updatefile.getTarget()
+                ,updatefile.getFilemap(),updatefile.getType());
+        return JsonData.buildSuccess();
+    }
 
     static class QueryData {
         Integer pageNum;
@@ -172,6 +182,45 @@ public class VideoController {
 
         public void setTypes(List<List<Object>> types) {
             this.types = types;
+        }
+    }
+
+    static class Updatefile{
+        String  target;
+        String  source;
+        String  type;
+        List<UpdateFileName> filemap;
+
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(String source) {
+            this.source = source;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public List<UpdateFileName> getFilemap() {
+            return filemap;
+        }
+
+        public void setFilemap(List<UpdateFileName> filemap) {
+            this.filemap = filemap;
         }
     }
 }

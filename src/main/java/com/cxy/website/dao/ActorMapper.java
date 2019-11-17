@@ -124,7 +124,7 @@ public interface ActorMapper {
             "id, name, chinese_name, contry, birth, type, cover_url, creat_time, creater, ",
             "remark",
             "from tb_actor",
-            "where type = #{type,jdbcType=INTEGER}"
+            "where type = #{type,jdbcType=INTEGER} and remark >=5"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -233,7 +233,7 @@ public interface ActorMapper {
             "select",
             "act.id, act.name, act.chinese_name, act.contry, act.birth, act.type, act.cover_url, act.creat_time, act.creater, ",
             "act.remark",
-            "from tb_actor act"
+            "from tb_actor act where remark >=5"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),

@@ -69,6 +69,5 @@ public class DownloadPicImpl implements DownloadPic {
             e.printStackTrace();
             return ;
         }
-
     }
 }

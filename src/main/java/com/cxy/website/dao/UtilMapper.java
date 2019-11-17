@@ -12,6 +12,8 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
+import java.util.List;
+
 public interface UtilMapper {
     @Delete({
         "delete from tb_util",
@@ -66,4 +68,16 @@ public interface UtilMapper {
             @Result(column="value", property="value", jdbcType=JdbcType.VARCHAR)
     })
     Util selectByKey(String key);
+
+    @Select({
+            "select",
+            " util.id, util.key, util.value",
+            "from tb_util util"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="key", property="key", jdbcType=JdbcType.VARCHAR),
+            @Result(column="value", property="value", jdbcType=JdbcType.VARCHAR)
+    })
+    List<Util> selectAll();
 }

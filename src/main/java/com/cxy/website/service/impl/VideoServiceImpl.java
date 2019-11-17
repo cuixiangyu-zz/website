@@ -4,14 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.VideoMapper;
-import com.cxy.website.model.Actor;
-import com.cxy.website.model.Picture;
-import com.cxy.website.model.Type;
-import com.cxy.website.model.Video;
-import com.cxy.website.service.ActorService;
-import com.cxy.website.service.TypeService;
-import com.cxy.website.service.VideoService;
-import com.cxy.website.service.WebSiteToolsService;
+import com.cxy.website.model.*;
+import com.cxy.website.service.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +34,10 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     WebSiteToolsService webSiteToolsService;
+
+    @Autowired
+    UtilService utilService;
+
     /**
      * 添加
      *
@@ -157,9 +155,12 @@ public class VideoServiceImpl implements VideoService {
             video = getVideo(video, video.getId());
         }
         PageInfo<Video> page = new PageInfo<Video>(videos);
-        List<Type> alltypes = typeService.findByType(CommonStatus.TYPE_TYPE_JAPAN);
+
+        /*List<Type> alltypes = typeService.findByType(CommonStatus.TYPE_TYPE_JAPAN);
+        Map<String, Object> jsondata = getTypeList(alltypes, type);*/
+
         List<Actor> actors = actorService.findByType(CommonStatus.ACTOR_TYPE_JAPAN);
-        Map<String, Object> jsondata = getTypeList(alltypes, type);
+        Map<String, Object> jsondata = new HashMap<>();
         jsondata.put("PageInfo",page);
         jsondata.put("actors",actors);
         return JsonData.buildSuccess(jsondata);
@@ -223,74 +224,19 @@ public class VideoServiceImpl implements VideoService {
 
     /**
      * 将本地文件信息保存到数据库
-     * @param localAddress 文件地址
+     * @param source
+     * @param target 文件地址
+     * @param filemap
+     * @param type
      */
     @Override
-    public void updateVideoFromLocal(String localAddress){
-        File file = new File(localAddress);
-        if(file.exists()&&file.isFile()){
-            Video video = new Video();
-            String filename = file.getName().substring(0,file.getName().indexOf("."));
+    public void updateVideoFromLocal(String source, String target, List<UpdateFileName> filemap, String type){
+        System.out.println(System.currentTimeMillis());
 
-            //从网页获取视频基本信息
-            Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename);
-            if(videoinfo==null||videoinfo.get("title")==null||videoinfo.get("title")==""){
-                return;
-            }
-            List<String> artists = (List)videoinfo.get("artists");
-
-            if(artists!=null&&artists.size()>0){
-                for (String artist : artists) {
-                    Actor actor = actorService.findByName(artist);
-                    if(actor==null){
-                        Actor actor1 = new Actor();
-                        actor1.setName(artist);
-                        actor1.setChineseName(artist);
-                        actor1.setType(CommonStatus.ACTOR_TYPE_JAPAN);
-                        actor1.setCreatTime(new Date());
-                        actorService.add(actor1);
-                    }
-                }
-            }
-            //移动视频文件到对应演员的文件夹
-            if(artists.size()==1){
-                String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
-                        artists.get(0)+File.separator+file.getName();
-                webSiteToolsService.moveFiles(localAddress,targetPath);
-                video.setVideoUrl(File.separator+"japanvideo"+File.separator+
-                        artists.get(0)+File.separator+file.getName());
-            }else{
-                String targetPath = CommonStatus.FILE_ADDRESS_PREFIX +File.separator+"japanvideo"+File.separator+
-                        "多作者"+File.separator+file.getName();
-                webSiteToolsService.moveFiles(localAddress,targetPath);
-                video.setVideoUrl(File.separator+"japanvideo"+File.separator+
-                        "多作者"+File.separator+file.getName());
-            }
-
-            //下载视频封面
-            if(videoinfo.get("picurl")!=null){
-                webSiteToolsService.downloadPics(videoinfo.get("picurl").toString(), CommonStatus.FILE_COVER_PREFIX + File.separator +
-                        "japanVideoCover", filename);
-                video.setCoverUrl(File.separator +
-                        "japanVideoCover"+File.separator+filename + ".jpg");
-            }
-
-            video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
-            video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
-            video.setName(videoinfo.get("title")==null?filename:videoinfo.get("title").toString());
-            video.setCreatTime(new Date());
-            add(video);
-            Video video1 = findByName(video.getName());
-            if(videoinfo.get("category")!=null&&((List) videoinfo.get("category")).size()>0){
-                typeService.updateVideoType(video1.getId(),(List<String>)videoinfo.get("category"));
-            }
-            if(videoinfo.get("artists")!=null&&((List) videoinfo.get("artists")).size()>0){
-                actorService.updateVideoActor(video1.getId(),(List<String>)videoinfo.get("artists"));
-            }
-        }else if(file.exists()&&file.isDirectory()){
-            File[] listFiles = file.listFiles();
-            for (File listFile : listFiles) {
-                updateVideoFromLocal(listFile.getPath());
+        if (filemap != null && filemap.size() > 0) {
+            for (UpdateFileName updateFileName : filemap) {
+                UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService);
+                updateFile.update();
             }
         }
     }
@@ -351,5 +297,39 @@ public class VideoServiceImpl implements VideoService {
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    public List<UpdateFileName> selectfile(String filepath) {
+        File file = new File(filepath);
+        List<UpdateFileName> filelist = new ArrayList<UpdateFileName>();
+        List<Util> utils = utilService.findAll();
+        if(file.exists()&&file.isDirectory()){
+            File[] listFiles = file.listFiles();
+            for (File listFile : listFiles) {
+                String filename = listFile.getName();
+                String index = filename.substring(filename.lastIndexOf("."),filename.length());
+                String name = filename.substring(0,filename.lastIndexOf("."));
+
+                for (Util util : utils) {
+                    if(name.indexOf(util.getKey())>=0){
+                        name=name.replace(util.getKey(),util.getValue()==null?"":util.getValue());
+                    }
+                }
+                name.trim();
+                if(name.substring(name.length()-1,name.length()).equals("C")){
+                    name = name.substring(0,name.length()-1);
+                }
+                if(name.indexOf("-")<0){
+                    name=name.substring(0, name.length()-3)+"-"+name.substring(name.length()-3, name.length());
+                }
+                name=name.toUpperCase();
+                UpdateFileName updateFileName = new UpdateFileName();
+                updateFileName.setFilename(filename);
+                updateFileName.setSuggestname(name+index);
+                filelist.add(updateFileName);
+            }
+        }
+        return filelist;
     }
 }

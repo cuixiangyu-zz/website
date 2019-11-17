@@ -6,6 +6,8 @@ import com.cxy.website.service.UtilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @program: website
  * @description:
@@ -76,5 +78,11 @@ public class UtilServiceImpl implements UtilService {
     public Util findBykey(String key) {
         Util util = utilMapper.selectByKey(key);
         return util;
+    }
+
+    @Override
+    public List<Util> findAll() {
+        List<Util> utils = utilMapper.selectAll();
+        return utils;
     }
 }

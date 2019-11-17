@@ -1,7 +1,7 @@
 package com.cxy.website.service;
 
 import com.cxy.website.common.util.web.JsonData;
-import com.cxy.website.model.Util;
+import com.cxy.website.model.UpdateFileName;
 import com.cxy.website.model.Video;
 import com.github.pagehelper.PageInfo;
 
@@ -67,9 +67,12 @@ public interface VideoService {
 
     /**
      * 将本地文件信息保存到数据库
-     * @param localAddress 文件地址
+     * @param source
+     * @param target 文件地址
+     * @param filemap
+     * @param type
      */
-    void updateVideoFromLocal(String localAddress);
+    void updateVideoFromLocal(String source, String target, List<UpdateFileName> filemap, String type);
 
     /**
      * 保存未下载影片信息
@@ -79,4 +82,6 @@ public interface VideoService {
      * @param arrayurl  分类和作者
      */
     void saveNotDownloadInfo(String title,String picurl,String id,String arrayurl);
+
+    List<UpdateFileName> selectfile(String filepath);
 }
