@@ -84,4 +84,6 @@ public interface VideoService {
     void saveNotDownloadInfo(String title,String picurl,String id,String arrayurl);
 
     List<UpdateFileName> selectfile(String filepath);
+
+    void changeLevel(String id, String level, Integer typeTypeComic);
 }

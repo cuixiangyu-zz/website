@@ -23,6 +23,16 @@ public class Video implements Serializable {
 
     private String remark;
 
+    private String level;
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
     private List<Actor> actors;
 
     private List<Type> types;

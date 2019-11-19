@@ -84,4 +84,6 @@ public interface ActorService {
     List<Actor> findByType(Integer type);
 
     void updateVideoActor(Integer id, List<String> artists);
+
+    public void updateLevel(Integer videoId);
 }

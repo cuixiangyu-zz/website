@@ -74,8 +74,8 @@ public class LevelServiceImpl implements LevelService {
      * @return
      */
     @Override
-    public List<Level> findByProductionId(int productionId) {
-        List<Level> levels = levelMapper.selectByProductionId(productionId);
+    public List<Level> findByProductionIdandType(int productionId,int productiontype) {
+        List<Level> levels = levelMapper.selectByProductionIdandType(productionId,productiontype);
         return levels;
     }
 
@@ -88,6 +88,12 @@ public class LevelServiceImpl implements LevelService {
     @Override
     public List<Level> findByLevel(int level) {
         List<Level> levels = levelMapper.selectByLevel(level);
+        return levels;
+    }
+
+    @Override
+    public Level findByProductionIdAndUserId(Integer id, Integer userId, Integer type) {
+        Level levels = levelMapper.findByProductionIdAndUserId(id,userId,type);
         return levels;
     }
 }

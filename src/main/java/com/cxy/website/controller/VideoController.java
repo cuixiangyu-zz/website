@@ -1,5 +1,6 @@
 package com.cxy.website.controller;
 
+import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.*;
 import com.cxy.website.service.ActorService;
@@ -81,15 +82,24 @@ public class VideoController {
         return videos;
     }
 
+    /**
+     * 根据影片id获取影片详细信息：影片基本信息，演员，分类
+     * @param id    影片id
+     * @return  影片详细信息
+     */
     @RequestMapping(value = "/getDetile",method = RequestMethod.GET)
     @ResponseBody
     public JsonData getDetile(@RequestParam Integer id){
-
         Video videos = videoService.findByid(id);
         videos = videoService.getVideo(videos, id);
         return JsonData.buildSuccess(videos);
     }
 
+    /**
+     * 根据条件查询分页信息
+     * @param queryData 查询条件实体类
+     * @return  分页信息
+     */
     @RequestMapping(value = "/getPageList" , method = RequestMethod.POST)
     @ResponseBody
     public JsonData getPageList(@RequestBody PictureController.QueryData queryData){
@@ -97,6 +107,11 @@ public class VideoController {
         return jsonData;
     }
 
+    /**
+     * 查找目录下所有文件，并提供建议文件名
+     * @param source    文件夹路径
+     * @return  文件名list
+     */
     @RequestMapping(value = "/selectfile" , method = RequestMethod.GET)
     @ResponseBody
     public JsonData selectfile(@RequestParam String source){
@@ -110,6 +125,15 @@ public class VideoController {
         return JsonData.buildSuccess(updateFileNames);
     }
 
+    /**
+     * 将页面信息保存到数据库
+     * @param request   request
+     * @param title     作品名
+     * @param picurl    封面url
+     * @param id    id
+     * @param arrayurl  分类和演员
+     * @return
+     */
     @CrossOrigin
     @RequestMapping("/saveinfo")
     @ResponseBody
@@ -120,6 +144,11 @@ public class VideoController {
         return JsonData.buildSuccess();
     }
 
+    /**
+     * 将本地文件信息保存到数据库
+     * @param updatefile    来源文件夹，目标文件夹，文件类型
+     * @return JsonData
+     */
     @RequestMapping(value = "/updatefile" , method = RequestMethod.POST)
     @ResponseBody
     public JsonData updatefile(@RequestBody Updatefile updatefile){
@@ -129,6 +158,22 @@ public class VideoController {
         return JsonData.buildSuccess();
     }
 
+    /**
+     * 更新作品分数
+     * @param id    作品id
+     * @param level 作品分数
+     * @return JsonData
+     */
+    @RequestMapping(value = "/changelevel" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData changeLevel(@RequestParam String id,@RequestParam String level){
+        videoService.changeLevel(id,level, CommonStatus.TYPE_TYPE_JAPAN);
+        return JsonData.buildSuccess();
+    }
+
+    /**
+     * 分页查询条件实体类
+     */
     static class QueryData {
         Integer pageNum;
         Integer pageSize;
@@ -185,6 +230,9 @@ public class VideoController {
         }
     }
 
+    /**
+     * 更新文件实体类
+     */
     static class Updatefile{
         String  target;
         String  source;

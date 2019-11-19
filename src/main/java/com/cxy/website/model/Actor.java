@@ -24,6 +24,26 @@ public class Actor implements Serializable {
 
     private String remark;
 
+    private Integer count;
+
+    private Integer level;
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
     private static final long serialVersionUID = 1L;
 
     public Integer getId() {

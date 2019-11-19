@@ -1,17 +1,22 @@
 package com.cxy.website.service.impl;
 
+import com.cxy.website.common.CommonStatus;
 import com.cxy.website.dao.ActorMapper;
 import com.cxy.website.dao.ActorTypeMapper;
 import com.cxy.website.dao.VideoActorMapper;
 import com.cxy.website.model.Actor;
+import com.cxy.website.model.Level;
 import com.cxy.website.model.Video;
 import com.cxy.website.service.ActorService;
+import com.cxy.website.service.LevelService;
+import com.cxy.website.service.VideoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: website
@@ -27,6 +32,12 @@ public class ActorServiceImpl implements ActorService {
 
     @Autowired
     VideoActorMapper videoActorMapper;
+
+    @Autowired
+    VideoService videoService;
+
+    @Autowired
+    LevelService levelService;
 
     /**
      * 添加
@@ -170,6 +181,10 @@ public class ActorServiceImpl implements ActorService {
     public PageInfo<Actor> findAll(int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         List<Actor> actors = actorMapper.selectAll();
+        for (Actor actor : actors) {
+            String address = CommonStatus.FILE_URL_PREFIX + actor.getCoverUrl();
+            actor.setCoverUrl(address);
+        }
         PageInfo<Actor> page = new PageInfo<Actor>(actors);
         return page;
     }
@@ -183,5 +198,43 @@ public class ActorServiceImpl implements ActorService {
     @Override
     public void updateVideoActor(Integer id, List<String> artists) {
         videoActorMapper.updateVideoActor(id,artists);
+    }
+
+    /**
+     * 根据视频id更新演员分数
+     * @param videoId 视频id
+     */
+    @Override
+    public void updateLevel(Integer videoId){
+        if(videoId!=null){
+            Video video = videoService.findByid(videoId);
+            List<Actor> actors = this.findByVideoid(videoId);
+            for (Actor actor : actors) {
+                updateLevel(actor);
+            }
+        }else{
+            List<Actor> actors = this.findByType(CommonStatus.ACTOR_TYPE_JAPAN);
+            for (Actor actor : actors) {
+                updateLevel(actor);
+            }
+        }
+    }
+
+    private void updateLevel(Actor actor) {
+        Map<String, Object> actorLevel = actorMapper.selectActorLevel(actor.getId());
+        List<Level> levelList = levelService.findByProductionIdandType(actor.getId(), CommonStatus.TYPE_TYPE_ARTIST);
+        if(levelList!=null&&levelList.size()>0){
+            Level level = levelList.get(0);
+            level.setLevel(actorLevel.get("level").toString());
+            level.setUserId(Integer.valueOf(actorLevel.get("count").toString()));
+            levelService.update(level);
+        }else{
+            Level level = new Level();
+            level.setLevel(actorLevel.get("level").toString());
+            level.setUserId(Integer.valueOf(actorLevel.get("count").toString()));
+            level.setProductionId(actor.getId());
+            level.setProductionType(CommonStatus.TYPE_TYPE_ARTIST);
+            levelService.add(level);
+        }
     }
 }

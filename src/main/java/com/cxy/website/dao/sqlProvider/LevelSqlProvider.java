@@ -21,10 +21,14 @@ public class LevelSqlProvider {
             sql.VALUES("level", "#{level,jdbcType=INTEGER}");
         }
         
-        if (record.getWatchNum() != null) {
-            sql.VALUES("watch_num", "#{watchNum,jdbcType=INTEGER}");
+        if (record.getUserId() != null) {
+            sql.VALUES("user_id", "#{userId,jdbcType=INTEGER}");
         }
-        
+
+        if (record.getProductionType() != null) {
+            sql.VALUES("production_type", "#{productionType,jdbcType=INTEGER}");
+        }
+
         return sql.toString();
     }
 
@@ -40,8 +44,12 @@ public class LevelSqlProvider {
             sql.SET("level = #{level,jdbcType=INTEGER}");
         }
         
-        if (record.getWatchNum() != null) {
-            sql.SET("watch_num = #{watchNum,jdbcType=INTEGER}");
+        if (record.getUserId() != null) {
+            sql.SET("user_id = #{userId,jdbcType=INTEGER}");
+        }
+
+        if (record.getProductionType() != null) {
+            sql.SET("production_type = #{productionType,jdbcType=INTEGER}");
         }
         
         sql.WHERE("id = #{id,jdbcType=INTEGER}");

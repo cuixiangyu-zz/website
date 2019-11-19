@@ -7,9 +7,11 @@ public class Level implements Serializable {
 
     private Integer productionId;
 
-    private Integer level;
+    private String level;
 
-    private Integer watchNum;
+    private Integer userId;
+
+    private Integer productionType;
 
     private static final long serialVersionUID = 1L;
 
@@ -29,34 +31,31 @@ public class Level implements Serializable {
         this.productionId = productionId;
     }
 
-    public Integer getLevel() {
+    public String getLevel() {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(String level) {
         this.level = level;
     }
 
-    public Integer getWatchNum() {
-        return watchNum;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setWatchNum(Integer watchNum) {
-        this.watchNum = watchNum;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productionId=").append(productionId);
-        sb.append(", level=").append(level);
-        sb.append(", watchNum=").append(watchNum);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
+    public Integer getProductionType() {
+        return productionType;
+    }
+
+    public void setProductionType(Integer productionType) {
+        this.productionType = productionType;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 }

@@ -1,11 +1,14 @@
 package com.cxy.website.controller;
 
+import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.Actor;
 import com.cxy.website.service.ActorService;
+import com.cxy.website.service.LevelService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -51,9 +54,9 @@ public class ActorController {
 
     @RequestMapping("/findAll")
     @ResponseBody
-    public PageInfo<Actor> findAll(int pageNum, int pageSize){
+    public JsonData findAll(@RequestParam int pageNum,@RequestParam int pageSize){
         PageInfo<Actor> actors = actorService.findAll(pageNum, pageSize);
-        return actors;
+        return JsonData.buildSuccess(actors);
     }
 
     @RequestMapping("/findBycountry")

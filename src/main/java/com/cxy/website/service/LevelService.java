@@ -40,7 +40,7 @@ public interface LevelService {
      * @param productionId
      * @return
      */
-    List<Level> findByProductionId(int productionId);
+    List<Level> findByProductionIdandType(int productionId,int productiontype);
 
     /**
      * 根据级别查找
@@ -48,4 +48,6 @@ public interface LevelService {
      * @return
      */
     List<Level> findByLevel(int level);
+
+    Level findByProductionIdAndUserId(Integer id, Integer userId, Integer type);
 }

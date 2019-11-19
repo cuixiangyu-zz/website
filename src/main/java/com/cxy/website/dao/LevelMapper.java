@@ -16,73 +16,95 @@ import java.util.List;
 
 public interface LevelMapper {
     @Delete({
-        "delete from tb_level",
-        "where id = #{id,jdbcType=INTEGER}"
+            "delete from tb_level",
+            "where id = #{id,jdbcType=INTEGER}"
     })
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
-        "insert into tb_level (id, production_id, ",
-        "level, watch_num)",
-        "values (#{id,jdbcType=INTEGER}, #{productionId,jdbcType=INTEGER}, ",
-        "#{level,jdbcType=INTEGER}, #{watchNum,jdbcType=INTEGER})"
+            "insert into tb_level (id, production_id, ",
+            "level, user_id , production_type)",
+            "values (#{id,jdbcType=INTEGER}, #{productionId,jdbcType=INTEGER}, ",
+            "#{level,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{productionType,jdbcType=INTEGER})"
     })
     int insert(Level record);
 
-    @InsertProvider(type= LevelSqlProvider.class, method="insertSelective")
+    @InsertProvider(type = LevelSqlProvider.class, method = "insertSelective")
     int insertSelective(Level record);
 
     @Select({
-        "select",
-        "id, production_id, level, watch_num",
-        "from tb_level",
-        "where id = #{id,jdbcType=INTEGER}"
+            "select",
+            "id, production_id, level, user_id,production_type",
+            "from tb_level",
+            "where id = #{id,jdbcType=INTEGER}"
     })
     @Results({
-        @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-        @Result(column="production_id", property="productionId", jdbcType=JdbcType.INTEGER),
-        @Result(column="level", property="level", jdbcType=JdbcType.INTEGER),
-        @Result(column="watch_num", property="watchNum", jdbcType=JdbcType.INTEGER)
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "production_id", property = "productionId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
+            @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
     Level selectByPrimaryKey(Integer id);
 
-    @UpdateProvider(type=LevelSqlProvider.class, method="updateByPrimaryKeySelective")
+    @UpdateProvider(type = LevelSqlProvider.class, method = "updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(Level record);
 
     @Update({
-        "update tb_level",
-        "set production_id = #{productionId,jdbcType=INTEGER},",
-          "level = #{level,jdbcType=INTEGER},",
-          "watch_num = #{watchNum,jdbcType=INTEGER}",
-        "where id = #{id,jdbcType=INTEGER}"
+            "update tb_level",
+            "set production_id = #{productionId,jdbcType=INTEGER},",
+            "level = #{level,jdbcType=INTEGER},",
+            "user_id = #{userId,jdbcType=INTEGER} ,",
+            "production_type = #{productionType,jdbcType=INTEGER}",
+            "where id = #{id,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(Level record);
 
     @Select({
             "select",
-            "id, production_id, level, watch_num",
+            "id, production_id, level, user_id,production_type",
             "from tb_level",
-            "where production_id = #{productionId,jdbcType=INTEGER}"
+            "where production_id = #{productionId,jdbcType=INTEGER}",
+            "and production_type = #{productionType,jdbcType=INTEGER}"
     })
     @Results({
-            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-            @Result(column="production_id", property="productionId", jdbcType=JdbcType.INTEGER),
-            @Result(column="level", property="level", jdbcType=JdbcType.INTEGER),
-            @Result(column="watch_num", property="watchNum", jdbcType=JdbcType.INTEGER)
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "production_id", property = "productionId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
+            @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
-    List<Level> selectByProductionId(int productionId);
+    List<Level> selectByProductionIdandType(int productionId,int productionType);
 
     @Select({
             "select",
-            "id, production_id, level, watch_num",
+            "id, production_id, level, user_id,production_type",
             "from tb_level",
             "where level = #{level,jdbcType=INTEGER}"
     })
     @Results({
-            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
-            @Result(column="production_id", property="productionId", jdbcType=JdbcType.INTEGER),
-            @Result(column="level", property="level", jdbcType=JdbcType.INTEGER),
-            @Result(column="watch_num", property="watchNum", jdbcType=JdbcType.INTEGER)
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "production_id", property = "productionId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
+            @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
     List<Level> selectByLevel(int level);
+
+    @Select({
+            "select",
+            "id, production_id, level, user_id,production_type",
+            "from tb_level",
+            "where production_id = #{id,jdbcType=INTEGER}",
+            "and user_id = #{userId,jdbcType=INTEGER}",
+            "and production_type = #{type,jdbcType=INTEGER}"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "production_id", property = "productionId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
+            @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
+    })
+    Level findByProductionIdAndUserId(Integer id, Integer userId, Integer type);
 }

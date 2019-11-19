@@ -5,12 +5,15 @@ import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.VideoMapper;
 import com.cxy.website.model.*;
+import com.cxy.website.model.sys.SysUser;
 import com.cxy.website.service.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.Subject;
 import java.io.File;
 import java.util.*;
 
@@ -37,6 +40,10 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     UtilService utilService;
+
+    @Autowired
+    LevelService levelService;
+
 
     /**
      * 添加
@@ -166,6 +173,12 @@ public class VideoServiceImpl implements VideoService {
         return JsonData.buildSuccess(jsondata);
     }
 
+    /**
+     * 根据类型列表和所选类型创建前端所用数据类型
+     * @param allTypes  所有类型
+     * @param selectTypes   所选类型
+     * @return  前端所用数据类型
+     */
     public Map<String, Object> getTypeList(List<Type> allTypes, List<String> selectTypes) {
         if (allTypes == null) {
             return null;
@@ -197,15 +210,36 @@ public class VideoServiceImpl implements VideoService {
         return jsondata;
     }
 
+    /**
+     * 组装前端需求视频实体类，主要更新封面地址，视频地址，演员和分类
+     * @param video 视频实体类
+     * @param id    视频id
+     * @return 需求视频实体类
+     */
     @Override
     public Video getVideo(Video video, Integer id) {
+
+        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
+        Level oldlevel =  levelService.findByProductionIdAndUserId(id,user.getId(),CommonStatus.TYPE_TYPE_JAPAN);
+        if(oldlevel!=null){
+            video.setLevel(oldlevel.getLevel());
+        }
+
+        List<String> addrlist = new ArrayList<String>();
+        addrlist.add("G:\\视频网站\\wesite_web");
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);
         video.setActors(actors);
         video.setTypes(types);
         video.setCoverUrl(CommonStatus.FILE_URL_PREFIX+video.getCoverUrl());
-        String address = CommonStatus.FILE_ADDRESS_PREFIX+video.getVideoUrl();
+        String address = "";
+        for (String addr : addrlist) {
+            address = addr + video.getVideoUrl();
+            if(new File(address).exists()){
+                break;
+            }
+        }
         File root = new File(address);
         List<String> piclist = new ArrayList<>();
         if(root.isFile()){
@@ -224,10 +258,10 @@ public class VideoServiceImpl implements VideoService {
 
     /**
      * 将本地文件信息保存到数据库
-     * @param source
+     * @param source    来源文件夹
      * @param target 文件地址
-     * @param filemap
-     * @param type
+     * @param filemap   文件名
+     * @param type  文件类型
      */
     @Override
     public void updateVideoFromLocal(String source, String target, List<UpdateFileName> filemap, String type){
@@ -239,8 +273,16 @@ public class VideoServiceImpl implements VideoService {
                 updateFile.update();
             }
         }
+        actorService.updateLevel(null);
     }
 
+    /**
+     * 保存未入库视频信息
+     * @param title 标题
+     * @param picurl    图片url
+     * @param id    id
+     * @param arrayurl  分类和作者
+     */
     @Override
     public void saveNotDownloadInfo(String title, String picurl, String id, String arrayurl) {
         try {
@@ -299,6 +341,11 @@ public class VideoServiceImpl implements VideoService {
         }
     }
 
+    /**
+     * 查询文件夹下所有视频，并提供建议文件名
+     * @param filepath  文件夹路径
+     * @return 建议文件名
+     */
     @Override
     public List<UpdateFileName> selectfile(String filepath) {
         File file = new File(filepath);
@@ -331,5 +378,29 @@ public class VideoServiceImpl implements VideoService {
             }
         }
         return filelist;
+    }
+
+    /**
+     * 更新作品分数
+     * @param id    作品id
+     * @param level 作品分数
+     * @param typeTypeComic 作品分类
+     */
+    @Override
+    public void changeLevel(String id, String level, Integer typeTypeComic) {
+        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
+        Level oldlevel =  levelService.findByProductionIdAndUserId(Integer.parseInt(id),user.getId(),typeTypeComic);
+        if(oldlevel!=null){
+            oldlevel.setLevel(level);
+            levelService.update(oldlevel);
+        }else{
+            Level levels = new Level();
+            levels.setLevel(level);
+            levels.setProductionId(Integer.parseInt(id));
+            levels.setProductionType(typeTypeComic);
+            levels.setUserId(user.getId());
+            levelService.add(levels);
+        }
+        actorService.updateLevel(Integer.parseInt(id));
     }
 }
