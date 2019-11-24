@@ -217,6 +217,10 @@ public class ActorServiceImpl implements ActorService {
             for (Actor actor : actors) {
                 updateLevel(actor);
             }
+            List<Actor> americanActors = this.findByType(CommonStatus.ACTOR_TYPE_AMERICAN);
+            for (Actor actor : americanActors) {
+                updateLevel(actor);
+            }
         }
     }
 
@@ -225,13 +229,13 @@ public class ActorServiceImpl implements ActorService {
         List<Level> levelList = levelService.findByProductionIdandType(actor.getId(), CommonStatus.TYPE_TYPE_ARTIST);
         if(levelList!=null&&levelList.size()>0){
             Level level = levelList.get(0);
-            level.setLevel(actorLevel.get("level").toString());
-            level.setUserId(Integer.valueOf(actorLevel.get("count").toString()));
+            level.setLevel(actorLevel.get("level")==null?"0":actorLevel.get("level").toString());
+            level.setUserId(Integer.valueOf(actorLevel.get("count")==null?"0":actorLevel.get("count").toString()));
             levelService.update(level);
         }else{
             Level level = new Level();
-            level.setLevel(actorLevel.get("level").toString());
-            level.setUserId(Integer.valueOf(actorLevel.get("count").toString()));
+            level.setLevel(actorLevel.get("level")==null?"0":actorLevel.get("level").toString());
+            level.setUserId(Integer.valueOf(actorLevel.get("count")==null?"0":actorLevel.get("count").toString()));
             level.setProductionId(actor.getId());
             level.setProductionType(CommonStatus.TYPE_TYPE_ARTIST);
             levelService.add(level);

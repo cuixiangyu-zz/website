@@ -54,6 +54,7 @@ public class SysMenuController {
                     menuMap.put("name",getConvert(menu.getPermission()));
                     Map map=new HashMap();
                     map.put("title",menu.getName());
+                    map.put("keepAlive",true);
                     menuMap.put("meta",map);
                     menuMap.put("path",menu.getPermission());
                     List<Map<String,Object>> sonMenuMapList=new ArrayList<>();
@@ -65,6 +66,7 @@ public class SysMenuController {
                             sonmMenuMap.put("name",getConvert(sonMenu.getPermission()));
                             Map map1=new HashMap();
                             map1.put("title",sonMenu.getName());
+                            map.put("keepAlive",true);
                             sonmMenuMap.put("meta",map1);
                             sonmMenuMap.put("path",sonMenu.getPermission());
                             sonmMenuMap.put("children","");

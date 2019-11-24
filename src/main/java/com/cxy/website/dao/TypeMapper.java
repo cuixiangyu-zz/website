@@ -62,7 +62,8 @@ public interface TypeMapper {
             "select",
             "id, type_name, chinese_name, type",
             "from tb_type",
-            "where type_name = #{name,jdbcType=VARCHAR}"
+            "where type_name = #{name,jdbcType=VARCHAR}",
+            "and type = #{type,jdbcType=INTEGER}"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -70,7 +71,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
-    Type selectByName(String name);
+    Type selectByName(String name,Integer type);
 
     @Select({
             "select",

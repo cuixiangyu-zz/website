@@ -13,9 +13,10 @@ import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.Subject;
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @program: website
@@ -44,7 +45,7 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     LevelService levelService;
 
-
+    private static final Pattern VIDEO_AMERICAN_PATTERN = Pattern.compile("[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}");
     /**
      * 添加
      *
@@ -141,10 +142,11 @@ public class VideoServiceImpl implements VideoService {
      * @param actorName   作者名
      * @param videoName 图片名
      * @param types       类型
+     * @param videoType
      * @return jsondata
      */
     @Override
-    public JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String videoName, String language, List<List<Object>> types) {
+    public JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String videoName, String language, List<List<Object>> types, Integer videoType) {
         PageHelper.startPage(pageNum, pageSize);
         List<String> type = null;
         if(types!=null&&types.size()>0){
@@ -157,7 +159,7 @@ public class VideoServiceImpl implements VideoService {
             }
         }
 
-        List<Video> videos = videoMapper.selectPageList(actorName, videoName, language, type);
+        List<Video> videos = videoMapper.selectPageList(actorName, videoName, language, type ,videoType);
         for (Video video : videos) {
             video = getVideo(video, video.getId());
         }
@@ -226,7 +228,10 @@ public class VideoServiceImpl implements VideoService {
         }
 
         List<String> addrlist = new ArrayList<String>();
-        addrlist.add("G:\\视频网站\\wesite_web");
+        addrlist.add("K:\\resources/");
+        addrlist.add("I:\\resource/");
+        addrlist.add("H:\\resources/");
+
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);
@@ -269,7 +274,7 @@ public class VideoServiceImpl implements VideoService {
 
         if (filemap != null && filemap.size() > 0) {
             for (UpdateFileName updateFileName : filemap) {
-                UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService);
+                UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService, levelService);
                 updateFile.update();
             }
         }
@@ -347,10 +352,11 @@ public class VideoServiceImpl implements VideoService {
      * @return 建议文件名
      */
     @Override
-    public List<UpdateFileName> selectfile(String filepath) {
+    public List<UpdateFileName> selectFileForJapan(String filepath) {
+        actorService.updateLevel(null);
         File file = new File(filepath);
         List<UpdateFileName> filelist = new ArrayList<UpdateFileName>();
-        List<Util> utils = utilService.findAll();
+        List<Util> utils = utilService.findByType(1);
         if(file.exists()&&file.isDirectory()){
             File[] listFiles = file.listFiles();
             for (File listFile : listFiles) {
@@ -374,6 +380,44 @@ public class VideoServiceImpl implements VideoService {
                 UpdateFileName updateFileName = new UpdateFileName();
                 updateFileName.setFilename(filename);
                 updateFileName.setSuggestname(name+index);
+                filelist.add(updateFileName);
+            }
+        }
+        return filelist;
+    }
+
+    /**
+     * 查询文件夹下所有视频，并提供建议文件名
+     * @param filepath  文件夹路径
+     * @return 建议文件名
+     */
+    @Override
+    public List<UpdateFileName> selectFileForAmerican(String filepath) {
+        File file = new File(filepath);
+        List<UpdateFileName> filelist = new ArrayList<UpdateFileName>();
+        List<Util> utils = utilService.findByType(2);
+        if(file.exists()&&file.isDirectory()){
+            File[] listFiles = file.listFiles();
+            for (File listFile : listFiles) {
+                String filename = listFile.getName();
+                String index = filename.substring(filename.lastIndexOf("."),filename.length());
+                String name = filename.substring(0,filename.lastIndexOf("."));
+                String search = "";
+                String time = "";
+                for (Util util : utils) {
+                    if(name.startsWith(util.getKey())){
+                        search=util.getValue();
+                    }
+                }
+                Matcher matcher = null;
+                matcher = VIDEO_AMERICAN_PATTERN.matcher(name);
+                while (matcher.find()) {
+                    time = matcher.group(0).trim();
+                }
+                time = time.replaceAll("\\.","-");
+                UpdateFileName updateFileName = new UpdateFileName();
+                updateFileName.setFilename(filename);
+                updateFileName.setSuggestname(search+"-"+time+index);
                 filelist.add(updateFileName);
             }
         }

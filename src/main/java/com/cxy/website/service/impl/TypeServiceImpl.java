@@ -5,11 +5,13 @@ import com.cxy.website.dao.VideoTypeMapper;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Type;
 import com.cxy.website.service.TypeService;
+import com.cxy.website.service.WebSiteToolsService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -26,6 +28,9 @@ public class TypeServiceImpl implements TypeService {
 
     @Autowired
     VideoTypeMapper videoTypeMapper;
+
+    @Autowired
+    WebSiteToolsService webSiteToolsService;
 
     /**
      * 添加
@@ -82,8 +87,8 @@ public class TypeServiceImpl implements TypeService {
      * @return
      */
     @Override
-    public Type findByName(String name) {
-        Type type = typeMapper.selectByName(name);
+    public Type findByName(String name,Integer types) {
+        Type type = typeMapper.selectByName(name,types);
         return type;
     }
 
@@ -133,5 +138,29 @@ public class TypeServiceImpl implements TypeService {
     @Override
     public void updatePicType(int picId, List<String> typeName) {
 
+    }
+
+    /**
+     * 从网页上查找分类并添加到库中
+     *
+     * @param url  网页地址
+     * @param type 分类类型
+     */
+    @Override
+    public void updateType(String url, Integer type) {
+        HashSet<String> htmls = webSiteToolsService.getHtmlbyRegex(url, "href=\\\"https://www.javbus.zone/genre/[A-Za-z0-9-]*\\\">.*</a>");
+        for (String html : htmls) {
+            String chineseName = html.substring(html.indexOf("genre/")+6,html.indexOf("\">"));
+            String typeName = html.substring(html.indexOf("\">")+2,html.indexOf("</a>"));
+            Type types = new Type();
+            types.setChineseName(chineseName);
+            types.setTypeName(typeName);
+            types.setType(type);
+            Type type1 = this.findByName(typeName, type);
+            if(type1!=null){
+                continue;
+            }
+            this.add(types);
+        }
     }
 }

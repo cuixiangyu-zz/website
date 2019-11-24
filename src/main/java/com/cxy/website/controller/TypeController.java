@@ -1,5 +1,6 @@
 package com.cxy.website.controller;
 
+import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.Type;
 import com.cxy.website.service.TypeService;
 import com.github.pagehelper.PageInfo;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -44,5 +46,11 @@ public class TypeController {
     public PageInfo<Type> getByType(int pageNum, int pageSize,int type){
         PageInfo<Type> pageInfo = typeService.findByType(pageNum,pageSize,type);
         return pageInfo;
+    }
+
+    @RequestMapping("/updateType")
+    public JsonData updateType(@RequestParam String url,@RequestParam Integer type){
+        typeService.updateType(url,type);
+        return JsonData.buildSuccess();
     }
 }

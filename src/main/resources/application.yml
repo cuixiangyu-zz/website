@@ -4,6 +4,8 @@ server:
     context-path: /website
   tomcat:
     uri-encoding: UTF-8
+    max-http-post-size: -1
+    max-http-header-size: 102400
 
 spring:
   datasource:
@@ -46,6 +48,7 @@ spring:
     static-path-pattern: /resources/**
   resources:
     static-locations: classpath:/static/,classpath:/public,classpath:/resources/,classpath:/META-INF/resources,file:K:\resources/,file:G:\COVER/
+      ,file:I:\resource/,file:H:\resources/
 
   #    classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,
 

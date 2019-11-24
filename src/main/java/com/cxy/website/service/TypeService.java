@@ -40,7 +40,7 @@ public interface TypeService {
      * @param name
      * @return
      */
-    Type findByName(String name);
+    Type findByName(String name,Integer type);
 
     /**
      * 根据中文名查找
@@ -60,4 +60,11 @@ public interface TypeService {
     void updateVideoType(int videoId , List<String> typeName);
 
     void updatePicType(int picId , List<String> typeName);
+
+    /**
+     * 从网页上查找分类并添加到库中
+     * @param url   网页地址
+     * @param type  分类类型
+     */
+    void updateType(String url, Integer type);
 }

@@ -165,7 +165,7 @@ public interface VideoMapper {
             " left join tb_video_type viotyp on vio.id = viotyp.video_id",
             " left join tb_type typ on viotyp.type_id = typ.id",
             "</if>",
-            "where 1=1",
+            "where 1=1 and vio.type = #{videoType,jdbcType=INTEGER}",
             "<if test='types !=null'>",
             "and typ.id in",
             "<foreach collection='types' item='type'  open='(' separator=',' close=')'>",
@@ -194,5 +194,5 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
-    List<Video> selectPageList(String actorName, String videoName, String language, List<String> types);
+    List<Video> selectPageList(String actorName, String videoName, String language, List<String> types , Integer videoType);
 }

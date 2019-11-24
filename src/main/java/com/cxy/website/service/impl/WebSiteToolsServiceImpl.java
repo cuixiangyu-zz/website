@@ -25,17 +25,17 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
     /**
      * 影片分类
      */
-    private static final Pattern VIDEO_TYPE_PATTERN = Pattern.compile("href=\"https://www.seedmm.in/genre/[A-Za-z0-9-]*");
+    private static final Pattern VIDEO_TYPE_PATTERN = Pattern.compile("href=\"https://www.*/genre/[A-Za-z0-9-]*");
 
     /**
      * 影片演员
      */
-    private static final Pattern VIDEO_ACTOR_PATTERN = Pattern.compile("<a href=\"https://www.seedmm.in/star/.*\" title=\".*\">");
+    private static final Pattern VIDEO_ACTOR_PATTERN = Pattern.compile("<a href=\"https://www.*/star/.*\" title=\".*\">");
 
     /**
      * 影片图片
      */
-    private static final Pattern VIDEO_COVER_PATTERN = Pattern.compile("img src=\"https://pics.javcdn.pw/cover/.*.jpg");
+    private static final Pattern VIDEO_COVER_PATTERN = Pattern.compile("img src=\"https://.*/cover/.*.jpg");
 
     /**
      * 影片标题
@@ -126,7 +126,8 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         String picurl = "";
         try {
             //建立连接
-            URL url = new URL("https://www.seedmm.in/" + id);
+            URL url = new URL("https://www.javbus.zone/" + id);
+            // URL url = new URL("https://www.seedmm.in/" + id);
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
             httpUrlConn.setDoInput(true);
             httpUrlConn.setRequestMethod("GET");

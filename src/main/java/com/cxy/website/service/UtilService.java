@@ -1,6 +1,5 @@
 package com.cxy.website.service;
 
-import com.cxy.website.model.Actor;
 import com.cxy.website.model.Util;
 
 import java.util.List;
@@ -41,5 +40,5 @@ public interface UtilService {
      */
     Util findBykey(String key);
 
-    List<Util> findAll();
+    List<Util> findByType(Integer type);
 }

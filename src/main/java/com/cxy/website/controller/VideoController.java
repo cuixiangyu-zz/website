@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -102,8 +101,8 @@ public class VideoController {
      */
     @RequestMapping(value = "/getPageList" , method = RequestMethod.POST)
     @ResponseBody
-    public JsonData getPageList(@RequestBody PictureController.QueryData queryData){
-        JsonData jsonData = videoService.findPageList(queryData.getPageNum(),queryData.getPageSize(),queryData.getActorName(),queryData.getPictureName(),queryData.getLanguage(),queryData.getTypes());
+    public JsonData getPageList(@RequestBody QueryData queryData){
+        JsonData jsonData = videoService.findPageList(queryData.getPageNum(),queryData.getPageSize(),queryData.getActorName(),queryData.getPictureName(),queryData.getLanguage(),queryData.getTypes(),queryData.getVideoType());
         return jsonData;
     }
 
@@ -121,9 +120,28 @@ public class VideoController {
                 file1.renameTo(new File("L:\\resources"+File.separator+file1.getName()));
             }
         }*/
-        List<UpdateFileName> updateFileNames = videoService.selectfile(source);
+        List<UpdateFileName> updateFileNames = videoService.selectFileForJapan(source);
         return JsonData.buildSuccess(updateFileNames);
     }
+
+    /**
+     * 查找目录下所有文件，并提供建议文件名
+     * @param source    文件夹路径
+     * @return  文件名list
+     */
+    @RequestMapping(value = "/selectFileForAmerican" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData selectFileForAmerican(@RequestParam String source){
+        /*File file = new File(source);
+        for (File listFile : file.listFiles()) {
+            for (File file1 : listFile.listFiles()) {
+                file1.renameTo(new File("L:\\resources"+File.separator+file1.getName()));
+            }
+        }*/
+        List<UpdateFileName> updateFileNames = videoService.selectFileForAmerican(source);
+        return JsonData.buildSuccess(updateFileNames);
+    }
+
 
     /**
      * 将页面信息保存到数据库
@@ -181,6 +199,16 @@ public class VideoController {
         String pictureName;
         String language;
         List<List<Object>> types;
+        Integer videoType;
+
+        public Integer getVideoType() {
+            return videoType;
+        }
+
+        public void setVideoType(Integer videoType) {
+            this.videoType = videoType;
+        }
+
         public String getLanguage() {
             return language;
         }

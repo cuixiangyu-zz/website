@@ -61,7 +61,7 @@ public interface VideoService {
      */
     PageInfo<Video> findByType(int pageNum, int pageSize,int type);
 
-    JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types);
+    JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types, Integer videoType);
 
     Video getVideo(Video video, Integer id);
 
@@ -83,7 +83,9 @@ public interface VideoService {
      */
     void saveNotDownloadInfo(String title,String picurl,String id,String arrayurl);
 
-    List<UpdateFileName> selectfile(String filepath);
+    List<UpdateFileName> selectFileForJapan(String filepath);
 
     void changeLevel(String id, String level, Integer typeTypeComic);
+
+    public List<UpdateFileName> selectFileForAmerican(String filepath);
 }

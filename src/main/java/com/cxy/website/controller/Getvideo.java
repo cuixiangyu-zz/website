@@ -1,5 +1,6 @@
 package com.cxy.website.controller;
 
+import com.cxy.website.common.util.Transvideo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -59,6 +60,8 @@ public class Getvideo {
 
     @RequestMapping("/videos")
     public String video(){
+        /*Transvideo transvideo = new Transvideo();
+        transvideo.AviToMp4("I:\\japan/EBOD-478.AVI","I:\\japan/EBOD-478.mp4");*/
         return "/index";
     }
 }

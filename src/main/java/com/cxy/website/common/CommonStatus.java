@@ -36,7 +36,7 @@ public class CommonStatus {
     public static final Integer TYPE_TYPE_COMIC = 4;
     public static final Integer TYPE_TYPE_ARTIST = 5;
 
-    public static final String FILE_ADDRESS_PREFIX = "K:/resources";
+    public static final String FILE_ADDRESS_PREFIX = "K:\\resources";
     public static final String FILE_URL_PREFIX = "http://192.168.1.23:8081/website/resources";
     public static final String FILE_COVER_PREFIX = "G:/COVER";
 }

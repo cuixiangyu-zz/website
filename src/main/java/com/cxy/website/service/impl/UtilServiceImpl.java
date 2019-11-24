@@ -81,7 +81,7 @@ public class UtilServiceImpl implements UtilService {
     }
 
     @Override
-    public List<Util> findAll() {
+    public List<Util> findByType(Integer type) {
         List<Util> utils = utilMapper.selectAll();
         return utils;
     }

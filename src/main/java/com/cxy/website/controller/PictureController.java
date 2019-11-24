@@ -2,10 +2,7 @@ package com.cxy.website.controller;
 
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
-import com.cxy.website.model.Actor;
-import com.cxy.website.model.Picture;
-import com.cxy.website.model.PictureDetil;
-import com.cxy.website.model.Type;
+import com.cxy.website.model.*;
 import com.cxy.website.service.ActorService;
 import com.cxy.website.service.PictureService;
 import com.cxy.website.service.TypeService;
@@ -161,6 +158,32 @@ public class PictureController {
         return jsonData;
     }
 
+    /**
+     * 根据地址获取文件夹下所有图片并重命名
+     *
+     * @param source 文件夹地址
+     * @return 文件名和推荐名
+     */
+    @RequestMapping(value = "/getComicName" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData getComicName(@RequestParam String source){
+        return pictureService.getComicName(source);
+    }
+
+    /**
+     * 将本地文件信息保存到数据库
+     * @param updatefile    来源文件夹，目标文件夹，文件类型
+     * @return JsonData
+     */
+    @RequestMapping(value = "/updatefile" , method = RequestMethod.POST)
+    @ResponseBody
+    public JsonData updatefile(@RequestBody Updatefile updatefile){
+
+        pictureService.updatePicsFromLocal(updatefile.getSource(),updatefile.getTarget()
+                ,updatefile.getFilemap(),updatefile.getType());
+        return JsonData.buildSuccess();
+    }
+
     static class QueryData {
         Integer pageNum;
         Integer pageSize;
@@ -216,6 +239,48 @@ public class PictureController {
 
         public void setTypes(List<List<Object>> types) {
             this.types = types;
+        }
+    }
+
+    /**
+     * 更新文件实体类
+     */
+    static class Updatefile{
+        String  target;
+        String  source;
+        String  type;
+        List<UpdateFileName> filemap;
+
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(String source) {
+            this.source = source;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public List<UpdateFileName> getFilemap() {
+            return filemap;
+        }
+
+        public void setFilemap(List<UpdateFileName> filemap) {
+            this.filemap = filemap;
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.cxy.website.service.impl;
 
 import com.cxy.website.common.CommonStatus;
-import com.cxy.website.common.util.SpringUtils;
 import com.cxy.website.model.Actor;
+import com.cxy.website.model.Level;
 import com.cxy.website.model.UpdateFileName;
 import com.cxy.website.model.Video;
 import com.cxy.website.service.*;
@@ -28,9 +28,10 @@ public class UpdateFileImpl implements UpdateFile {
     private VideoService videoService;
     private TypeService typeService;
     private ActorService actorService;
+    private LevelService levelService;
 
     public UpdateFileImpl(String source, String target, String type, UpdateFileName updateFileName, WebSiteToolsService webSiteToolsService
-            , VideoService videoService, TypeService typeService, ActorService actorService) {
+            , VideoService videoService, TypeService typeService, ActorService actorService, LevelService levelService) {
         this.source = source;
         this.target = target;
         this.type = type;
@@ -39,6 +40,7 @@ public class UpdateFileImpl implements UpdateFile {
         this.videoService = videoService;
         this.typeService = typeService;
         this.actorService = actorService;
+        this.levelService = levelService;
     }
 
 
@@ -54,7 +56,7 @@ public class UpdateFileImpl implements UpdateFile {
     }
 
     @Async("asyncServiceExecutor")
-    public void update(){
+    public void update() {
         String fileaddress = source + File.separator + updateFileName.getFilename();
         String suggestname = updateFileName.getSuggestname();
 
@@ -69,7 +71,7 @@ public class UpdateFileImpl implements UpdateFile {
             return;
         }
         Video oldvideo = videoService.findByName(videoinfo.get("title").toString());
-        if (oldvideo != null && oldvideo.getExist() == 3) {
+        if (oldvideo != null && oldvideo.getExist() == 1) {
             List<Actor> actorList = actorService.findByVideoid(oldvideo.getId());
             if (actorList.size() == 1) {
                 String targetPath = target + File.separator + type + File.separator +
@@ -79,11 +81,12 @@ public class UpdateFileImpl implements UpdateFile {
                         actorList.get(0) + File.separator + suggestname);
             } else {
                 String targetPath = target + File.separator + type + File.separator +
-                        "多作者" + File.separator + file.getName();
+                        "多作者" + File.separator + suggestname;
                 webSiteToolsService.moveFiles(fileaddress, targetPath);
                 oldvideo.setVideoUrl(File.separator + type + File.separator +
                         "多作者" + File.separator + suggestname);
             }
+            oldvideo.setExist(1);
             videoService.update(oldvideo);
             return;
         } else if (oldvideo != null && oldvideo.getExist() == 1) {
@@ -98,9 +101,21 @@ public class UpdateFileImpl implements UpdateFile {
                     Actor actor1 = new Actor();
                     actor1.setName(artist);
                     actor1.setChineseName(artist);
-                    actor1.setType(CommonStatus.ACTOR_TYPE_JAPAN);
+                    if (this.type.equals("english")) {
+                        actor1.setType(CommonStatus.ACTOR_TYPE_AMERICAN);
+                    } else if (this.type.equals("japanvideo")) {
+                        actor1.setType(CommonStatus.ACTOR_TYPE_JAPAN);
+                    }
+
                     actor1.setCreatTime(new Date());
                     actorService.add(actor1);
+                    Actor actor2 = actorService.findByName(artist);
+                    Level level = new Level();
+                    level.setProductionId(actor2.getId());
+                    level.setLevel("0");
+                    level.setUserId(0);
+                    level.setProductionType(5);
+                    levelService.add(level);
                 }
             }
         }
@@ -126,7 +141,11 @@ public class UpdateFileImpl implements UpdateFile {
             video.setCoverUrl(File.separator +
                     "japanVideoCover" + File.separator + filename + ".jpg");
         }
-        video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
+        if (this.type.equals("english")) {
+            video.setType(CommonStatus.VIDEO_TYPE_AMERICAN);
+        } else if (this.type.equals("japanvideo")) {
+            video.setType(CommonStatus.VIDEO_TYPE_JAPAN);
+        }
         video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
         video.setName(videoinfo.get("title") == null ? filename : videoinfo.get("title").toString());
         video.setCreatTime(new Date());
