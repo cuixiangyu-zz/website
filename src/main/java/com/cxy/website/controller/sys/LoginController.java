@@ -13,9 +13,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -136,7 +134,7 @@ public class LoginController {
             @ApiImplicitParam(name = "password", value = "密码",paramType = "query",required = true,  dataType = "String",defaultValue="123456")
     })
     @LogDetail(logType="登录",type = 5)
-    public Object login(String userName,String password) throws Exception {
+    public Object login(@RequestParam String userName, @RequestParam String password) throws Exception {
         System.out.println("login()");
         Map<String, Object> map = new HashMap<>();
 
