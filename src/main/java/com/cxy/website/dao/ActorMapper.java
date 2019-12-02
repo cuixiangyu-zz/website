@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public interface ActorMapper {
             "delete from tb_actor",
             "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -34,9 +36,11 @@ public interface ActorMapper {
             "#{creatTime,jdbcType=TIMESTAMP}, #{creater,jdbcType=VARCHAR}, ",
             "#{remark,jdbcType=VARCHAR})"
     })
+    @CachePut
     int insert(Actor record);
 
     @InsertProvider(type = ActorSqlProvider.class, method = "insertSelective")
+    @CachePut
     int insertSelective(Actor record);
 
     @Select({
@@ -58,9 +62,11 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     Actor selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type = ActorSqlProvider.class, method = "updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Actor record);
 
     @Update({
@@ -76,6 +82,7 @@ public interface ActorMapper {
             "remark = #{remark,jdbcType=VARCHAR}",
             "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Actor record);
 
     @Select({
@@ -97,6 +104,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     Actor selectByName(String name);
 
     @Select({
@@ -118,6 +126,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     Actor selectByChineseName(String chineseName);
 
     @Select({
@@ -139,6 +148,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Actor> selectByType(int type);
 
     @Select({
@@ -160,6 +170,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Actor> selectByCountry(String country);
 
     @Select({
@@ -182,6 +193,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Actor> selectByLevel(int level);
 
     @Select({
@@ -205,6 +217,7 @@ public interface ActorMapper {
             @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Actor> selectByPictureid(Integer id);
 
     @Select({
@@ -232,6 +245,7 @@ public interface ActorMapper {
             @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
             @Result(column = "count", property = "count", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     List<Actor> selectByVideoid(Integer id);
 
     @Select({
@@ -256,6 +270,7 @@ public interface ActorMapper {
             @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
             @Result(column = "count", property = "count", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     List<Actor> selectAll();
 
     @Select({
@@ -281,5 +296,6 @@ public interface ActorMapper {
             @Result(column = "level", property = "level", jdbcType = JdbcType.INTEGER),
             @Result(column = "count", property = "count", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     Map<String, Object> selectActorLevel(Integer actorId);
 }

@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public interface ActorTypeMapper {
         "delete from tb_actor_type",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -27,9 +29,11 @@ public interface ActorTypeMapper {
         "values (#{id,jdbcType=INTEGER}, #{actorId,jdbcType=INTEGER}, ",
         "#{typeId,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(ActorType record);
 
     @InsertProvider(type= ActorTypeSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(ActorType record);
 
     @Select({
@@ -43,9 +47,11 @@ public interface ActorTypeMapper {
         @Result(column="actor_id", property="actorId", jdbcType=JdbcType.INTEGER),
         @Result(column="type_id", property="typeId", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     ActorType selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=ActorTypeSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(ActorType record);
 
     @Update({
@@ -54,5 +60,6 @@ public interface ActorTypeMapper {
           "type_id = #{typeId,jdbcType=INTEGER}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(ActorType record);
 }

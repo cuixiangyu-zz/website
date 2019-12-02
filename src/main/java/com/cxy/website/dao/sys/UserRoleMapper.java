@@ -4,6 +4,7 @@ import com.cxy.website.dao.sys.sqlprovider.UserRoleSqlProvider;
 import com.cxy.website.model.sys.UserRole;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public interface UserRoleMapper {
         "delete from tb_user_role",
         "where ID = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     /**
@@ -34,8 +36,11 @@ public interface UserRoleMapper {
         "values (#{id,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, ",
         "#{userId,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(UserRole record);
+
     @Select("select role_id from tb_user_role where user_id=#{userId}")
+    @Cacheable
     List<Integer> getRoleIdList(Integer userId);
 
     /**
@@ -45,6 +50,7 @@ public interface UserRoleMapper {
      * @mbg.generated
      */
     @InsertProvider(type= UserRoleSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(UserRole record);
 
     /**
@@ -64,6 +70,7 @@ public interface UserRoleMapper {
         @Result(column="ROLE_ID", property="roleId", jdbcType=JdbcType.INTEGER),
         @Result(column="USER_ID", property="userId", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     UserRole selectByPrimaryKey(Integer id);
 
     /**
@@ -73,6 +80,7 @@ public interface UserRoleMapper {
      * @mbg.generated
      */
     @UpdateProvider(type=UserRoleSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(UserRole record);
 
     /**
@@ -87,9 +95,11 @@ public interface UserRoleMapper {
           "USER_ID = #{userId,jdbcType=INTEGER}",
         "where ID = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(UserRole record);
 
     @Delete("delete from tb_user_role where user_id=#{userId}")
+    @CacheEvict
     void deleteUserRole(Integer userId);
 
     @Insert("<script>"  +
@@ -98,6 +108,7 @@ public interface UserRoleMapper {
             "(#{item.roleId},#{item.userId})" +
             " </foreach>"
             + "</script>")
+    @CachePut
     void insertUserRole(List<UserRole> list);
 
 

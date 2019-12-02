@@ -11,12 +11,16 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 public interface PictureTypeMapper {
     @Delete({
         "delete from tb_picture_type",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict(value="PictureType")
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -25,9 +29,11 @@ public interface PictureTypeMapper {
         "values (#{id,jdbcType=INTEGER}, #{pictureId,jdbcType=INTEGER}, ",
         "#{typeId,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(PictureType record);
 
     @InsertProvider(type= PictureTypeSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(PictureType record);
 
     @Select({
@@ -41,9 +47,11 @@ public interface PictureTypeMapper {
         @Result(column="picture_id", property="pictureId", jdbcType=JdbcType.INTEGER),
         @Result(column="type_id", property="typeId", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable(value="PictureType")
     PictureType selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=PictureTypeSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(PictureType record);
 
     @Update({
@@ -52,11 +60,13 @@ public interface PictureTypeMapper {
           "type_id = #{typeId,jdbcType=INTEGER}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(PictureType record);
 
     @Delete({
             "delete from tb_picture_type",
             "where picture_id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict(value="PictureType")
     int deleteByPictureId(int id);
 }

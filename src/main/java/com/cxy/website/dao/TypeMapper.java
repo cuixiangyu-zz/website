@@ -11,6 +11,9 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -19,6 +22,7 @@ public interface TypeMapper {
         "delete from tb_type",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -27,9 +31,11 @@ public interface TypeMapper {
         "values (#{id,jdbcType=INTEGER}, #{typeName,jdbcType=VARCHAR}, ",
         "#{chineseName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(Type record);
 
     @InsertProvider(type= TypeSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(Type record);
 
     @Select({
@@ -44,9 +50,11 @@ public interface TypeMapper {
         @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
         @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     Type selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=TypeSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Type record);
 
     @Update({
@@ -56,6 +64,7 @@ public interface TypeMapper {
           "type = #{type,jdbcType=INTEGER}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Type record);
 
     @Select({
@@ -71,6 +80,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     Type selectByName(String name,Integer type);
 
     @Select({
@@ -85,6 +95,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     Type selectByChineseName(String chinesename);
 
     @Select({
@@ -101,6 +112,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     List<Type> selectByPictureid(Integer id);
 
     @Select({
@@ -117,6 +129,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     List<Type> selectByVideoId(Integer id);
 
     @Select({
@@ -131,6 +144,7 @@ public interface TypeMapper {
             @Result(column="chinese_name", property="chineseName", jdbcType=JdbcType.VARCHAR),
             @Result(column="type", property="type", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     List<Type> selectByType(int type);
 
 }

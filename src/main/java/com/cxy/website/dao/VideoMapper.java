@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public interface VideoMapper {
         "delete from tb_video",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -35,9 +37,11 @@ public interface VideoMapper {
         "#{creater,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{exist,jdbcType=INTEGER}, ",
         "#{remark,jdbcType=VARCHAR})"
     })
+    @CachePut
     int insert(Video record);
 
     @InsertProvider(type= VideoSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(Video record);
 
     @Select({
@@ -58,9 +62,11 @@ public interface VideoMapper {
         @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Video selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=VideoSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Video record);
 
     @Update({
@@ -76,6 +82,7 @@ public interface VideoMapper {
           "remark = #{remark,jdbcType=VARCHAR}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Video record);
 
     @Select({
@@ -99,6 +106,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Video selectByName(String name);
 
     @Select({
@@ -124,6 +132,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Video> selectByActor(int id);
 
     @Select({
@@ -147,6 +156,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Video> selectByType(int type);
 
     @Select({
@@ -194,5 +204,6 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Video> selectPageList(String actorName, String videoName, String language, List<String> types , Integer videoType);
 }
