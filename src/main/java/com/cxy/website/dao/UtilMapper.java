@@ -11,6 +11,9 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -19,6 +22,7 @@ public interface UtilMapper {
         "delete from tb_util",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -27,9 +31,11 @@ public interface UtilMapper {
         "values (#{id,jdbcType=INTEGER}, #{key,jdbcType=VARCHAR}, ",
         "#{value,jdbcType=VARCHAR})"
     })
+    @CachePut
     int insert(Util record);
 
     @InsertProvider(type= UtilSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(Util record);
 
     @Select({
@@ -43,9 +49,11 @@ public interface UtilMapper {
         @Result(column="key", property="key", jdbcType=JdbcType.VARCHAR),
         @Result(column="value", property="value", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Util selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=UtilSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Util record);
 
     @Update({
@@ -54,6 +62,7 @@ public interface UtilMapper {
           "value = #{value,jdbcType=VARCHAR}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Util record);
 
     @Select({
@@ -67,6 +76,7 @@ public interface UtilMapper {
             @Result(column="key", property="key", jdbcType=JdbcType.VARCHAR),
             @Result(column="value", property="value", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Util selectByKey(String key);
 
     @Select({
@@ -79,5 +89,6 @@ public interface UtilMapper {
             @Result(column="key", property="key", jdbcType=JdbcType.VARCHAR),
             @Result(column="value", property="value", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Util> selectAll();
 }

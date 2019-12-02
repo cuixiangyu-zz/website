@@ -11,12 +11,15 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.*;
 
 public interface PictureActorMapper {
     @Delete({
         "delete from tb_picture_actor",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -25,9 +28,11 @@ public interface PictureActorMapper {
         "values (#{id,jdbcType=INTEGER}, #{pictureId,jdbcType=INTEGER}, ",
         "#{actorId,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(PictureActor record);
 
     @InsertProvider(type= PictureActorSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(PictureActor record);
 
     @Select({
@@ -41,9 +46,11 @@ public interface PictureActorMapper {
         @Result(column="picture_id", property="pictureId", jdbcType=JdbcType.INTEGER),
         @Result(column="actor_id", property="actorId", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     PictureActor selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=PictureActorSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(PictureActor record);
 
     @Update({
@@ -52,5 +59,6 @@ public interface PictureActorMapper {
           "actor_id = #{actorId,jdbcType=INTEGER}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(PictureActor record);
 }

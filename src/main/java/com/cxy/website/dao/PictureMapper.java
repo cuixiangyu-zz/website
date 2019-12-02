@@ -11,14 +11,19 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
 public interface PictureMapper {
+
     @Delete({
         "delete from tb_picture",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -35,9 +40,11 @@ public interface PictureMapper {
         "#{language,jdbcType=VARCHAR}, #{exist,jdbcType=INTEGER}, ",
         "#{remark,jdbcType=VARCHAR})"
     })
+    @CachePut
     int insert(Picture record);
 
     @InsertProvider(type= PictureSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(Picture record);
 
     @Select({
@@ -61,9 +68,11 @@ public interface PictureMapper {
         @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Picture selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=PictureSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Picture record);
 
     @Update({
@@ -81,6 +90,7 @@ public interface PictureMapper {
           "remark = #{remark,jdbcType=VARCHAR}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Picture record);
 
     @Select({
@@ -104,6 +114,7 @@ public interface PictureMapper {
             @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     Picture selectByName(String name);
 
     @Select({
@@ -128,6 +139,7 @@ public interface PictureMapper {
             @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Picture> selectByArtist(int id);
 
     @Select({
@@ -151,6 +163,7 @@ public interface PictureMapper {
             @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Picture> selectByType(int type);
 
     @Select({
@@ -174,6 +187,7 @@ public interface PictureMapper {
             @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Picture> selectByLanguage(String language);
 
     @Select({
@@ -218,5 +232,6 @@ public interface PictureMapper {
             @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
+    @Cacheable
     List<Picture> selectPageList(String actorName, String pictureName,String language, List<String> types);
 }

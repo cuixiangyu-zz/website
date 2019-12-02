@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public interface VideoTypeMapper {
         "delete from tb_video_type",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -27,9 +29,11 @@ public interface VideoTypeMapper {
         "values (#{id,jdbcType=INTEGER}, #{videoId,jdbcType=INTEGER}, ",
         "#{typeId,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(VideoType record);
 
     @InsertProvider(type= VideoTypeSqlProvider.class, method="insertSelective")
+    @CachePut
     int insertSelective(VideoType record);
 
     @Select({
@@ -43,9 +47,11 @@ public interface VideoTypeMapper {
         @Result(column="video_id", property="videoId", jdbcType=JdbcType.INTEGER),
         @Result(column="type_id", property="typeId", jdbcType=JdbcType.INTEGER)
     })
+    @Cacheable
     VideoType selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=VideoTypeSqlProvider.class, method="updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(VideoType record);
 
     @Update({
@@ -54,6 +60,7 @@ public interface VideoTypeMapper {
           "type_id = #{typeId,jdbcType=INTEGER}",
         "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(VideoType record);
 
     @Insert({
@@ -66,5 +73,6 @@ public interface VideoTypeMapper {
             "</foreach>",
             "</script>"
     })
+    @CachePut
     void updateVideoType(int videoId, List<String> typeName);
 }

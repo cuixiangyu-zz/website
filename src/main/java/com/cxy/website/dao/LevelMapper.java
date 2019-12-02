@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.cache.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public interface LevelMapper {
             "delete from tb_level",
             "where id = #{id,jdbcType=INTEGER}"
     })
+    @CacheEvict
     int deleteByPrimaryKey(Integer id);
 
     @Insert({
@@ -27,9 +29,11 @@ public interface LevelMapper {
             "values (#{id,jdbcType=INTEGER}, #{productionId,jdbcType=INTEGER}, ",
             "#{level,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{productionType,jdbcType=INTEGER})"
     })
+    @CachePut
     int insert(Level record);
 
     @InsertProvider(type = LevelSqlProvider.class, method = "insertSelective")
+    @CachePut
     int insertSelective(Level record);
 
     @Select({
@@ -45,9 +49,11 @@ public interface LevelMapper {
             @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
             @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     Level selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type = LevelSqlProvider.class, method = "updateByPrimaryKeySelective")
+    @CachePut
     int updateByPrimaryKeySelective(Level record);
 
     @Update({
@@ -58,6 +64,7 @@ public interface LevelMapper {
             "production_type = #{productionType,jdbcType=INTEGER}",
             "where id = #{id,jdbcType=INTEGER}"
     })
+    @CachePut
     int updateByPrimaryKey(Level record);
 
     @Select({
@@ -74,6 +81,7 @@ public interface LevelMapper {
             @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
             @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     List<Level> selectByProductionIdandType(int productionId,int productionType);
 
     @Select({
@@ -89,6 +97,7 @@ public interface LevelMapper {
             @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
             @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     List<Level> selectByLevel(int level);
 
     @Select({
@@ -106,5 +115,6 @@ public interface LevelMapper {
             @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
             @Result(column = "production_type", property = "productionType", jdbcType = JdbcType.INTEGER)
     })
+    @Cacheable
     Level findByProductionIdAndUserId(Integer id, Integer userId, Integer type);
 }
