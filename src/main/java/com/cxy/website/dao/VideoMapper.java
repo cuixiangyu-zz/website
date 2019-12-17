@@ -62,7 +62,7 @@ public interface VideoMapper {
         @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
-    @Cacheable
+    @Cacheable(cacheNames = "selectByPrimaryKey")
     Video selectByPrimaryKey(Integer id);
 
     @UpdateProvider(type=VideoSqlProvider.class, method="updateByPrimaryKeySelective")
@@ -106,7 +106,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
-    @Cacheable
+    @Cacheable(cacheNames = "selectByName")
     Video selectByName(String name);
 
     @Select({
@@ -132,7 +132,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
-    @Cacheable
+    @Cacheable(cacheNames = "selectByActor")
     List<Video> selectByActor(int id);
 
     @Select({
@@ -156,7 +156,7 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
-    @Cacheable
+    @Cacheable(cacheNames = "selectByType")
     List<Video> selectByType(int type);
 
     @Select({
@@ -204,6 +204,6 @@ public interface VideoMapper {
             @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
             @Result(column="level", property="level", jdbcType=JdbcType.VARCHAR)
     })
-    @Cacheable
+    @Cacheable(cacheNames = "selectPageList")
     List<Video> selectPageList(String actorName, String videoName, String language, List<String> types , Integer videoType);
 }
