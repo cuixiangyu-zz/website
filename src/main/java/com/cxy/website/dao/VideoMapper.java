@@ -183,10 +183,10 @@ public interface VideoMapper {
             "</foreach>",
             "</if>",
             "<if test='actorName !=null'>",
-            "and act.id = #{actorName}",
+            "and act.chinese_name like '%${actorName}%'",
             "</if>",
             "<if test='videoName !=null'>",
-            "and vio.name like '%#{videoName}%'",
+            "and vio.name like '%${videoName}%'",
             "</if>",
             "GROUP BY vio.id",
             "</script>"
