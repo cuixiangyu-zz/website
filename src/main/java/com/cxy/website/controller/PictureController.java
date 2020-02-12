@@ -65,7 +65,7 @@ public class PictureController {
      */
     @RequestMapping(value = "/delete" , method = RequestMethod.POST)
     @ResponseBody
-    public int update(@RequestBody Integer id){
+    public int delete(@RequestBody Integer id){
         int count = pictureService.delete(id);
         return count;
     }

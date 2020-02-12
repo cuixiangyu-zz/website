@@ -85,12 +85,12 @@
 
         <!--<table tableName="user" domainObjectName="User" enableCountByExample="false"-->
         <!--enableSelectByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"/>-->
-        <table schema="website" tableName="tb_video_actor" domainObjectName="VideoActor"
+        <table schema="website" tableName="tb_view_history" domainObjectName="ViewHistory"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
         </table>
-        <table schema="website" tableName="tb_picture_actor" domainObjectName="PictureActor"
+        <table schema="website" tableName="tb_user_favorite" domainObjectName="UserFavorite"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">

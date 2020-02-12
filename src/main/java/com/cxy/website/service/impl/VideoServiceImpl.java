@@ -45,6 +45,9 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     LevelService levelService;
 
+    @Autowired
+    UserFavoriteService userFavoriteService;
+
     private static final Pattern VIDEO_AMERICAN_PATTERN = Pattern.compile("[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}");
     /**
      * 添加
@@ -165,9 +168,6 @@ public class VideoServiceImpl implements VideoService {
         }
         PageInfo<Video> page = new PageInfo<Video>(videos);
 
-        /*List<Type> alltypes = typeService.findByType(CommonStatus.TYPE_TYPE_JAPAN);
-        Map<String, Object> jsondata = getTypeList(alltypes, type);*/
-
         List<Actor> actors = actorService.findByType(CommonStatus.ACTOR_TYPE_JAPAN);
         Map<String, Object> jsondata = new HashMap<>();
         jsondata.put("PageInfo",page);
@@ -235,6 +235,16 @@ public class VideoServiceImpl implements VideoService {
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);
+        Level level = levelService.findByProductionIdAndUserId(video.getId(), user.getId(), video.getType());
+        if(level!=null){
+            video.setLevel(level.getLevel());
+        }
+
+        UserFavorite userFavorite = userFavoriteService.findByUserIdAndVideoId(user.getId(),video.getType(),id);
+        if(userFavorite!=null){
+            video.setUserFavorite(userFavorite);
+        }
+
         video.setActors(actors);
         video.setTypes(types);
         video.setCoverUrl(CommonStatus.FILE_URL_PREFIX+video.getCoverUrl());
@@ -422,6 +432,20 @@ public class VideoServiceImpl implements VideoService {
             }
         }
         return filelist;
+    }
+
+    @Override
+    public void saveViewHistory(Integer type, Integer id, Integer startData, Integer watchTime) {
+
+    }
+
+    @Override
+    public JsonData getWatchList(List<Integer> idList) {
+        List<Video> videoList = videoMapper.selectByIdList(idList);
+        for (Video video : videoList) {
+            video = getVideo(video, video.getId());
+        }
+        return JsonData.buildSuccess(videoList);
     }
 
     /**

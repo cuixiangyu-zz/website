@@ -88,4 +88,8 @@ public interface VideoService {
     void changeLevel(String id, String level, Integer typeTypeComic);
 
     public List<UpdateFileName> selectFileForAmerican(String filepath);
+
+    void saveViewHistory(Integer type, Integer id, Integer startData, Integer watchTime);
+
+    JsonData getWatchList(List<Integer> idList);
 }

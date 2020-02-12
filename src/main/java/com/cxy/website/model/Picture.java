@@ -33,6 +33,26 @@ public class Picture implements Serializable {
 
     private List<String> address;
 
+    private String level;
+
+    private UserFavorite userFavorite;
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public UserFavorite getUserFavorite() {
+        return userFavorite;
+    }
+
+    public void setUserFavorite(UserFavorite userFavorite) {
+        this.userFavorite = userFavorite;
+    }
+
     public List<String> getAddress() {
         return address;
     }
@@ -56,7 +76,6 @@ public class Picture implements Serializable {
     public void setTypes(List<Type> types) {
         this.types = types;
     }
-
 
 
     private static final long serialVersionUID = 1L;

@@ -1,12 +1,16 @@
 package com.cxy.website.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.*;
+import com.cxy.website.model.sys.SysUser;
 import com.cxy.website.service.ActorService;
 import com.cxy.website.service.TypeService;
+import com.cxy.website.service.UserFavoriteService;
 import com.cxy.website.service.VideoService;
 import com.github.pagehelper.PageInfo;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -89,6 +93,7 @@ public class VideoController {
     @RequestMapping(value = "/getDetile",method = RequestMethod.GET)
     @ResponseBody
     public JsonData getDetile(@RequestParam Integer id){
+        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         Video videos = videoService.findByid(id);
         videos = videoService.getVideo(videos, id);
         return JsonData.buildSuccess(videos);
@@ -184,9 +189,32 @@ public class VideoController {
      */
     @RequestMapping(value = "/changelevel" , method = RequestMethod.GET)
     @ResponseBody
-    public JsonData changeLevel(@RequestParam String id,@RequestParam String level){
-        videoService.changeLevel(id,level, CommonStatus.TYPE_TYPE_JAPAN);
+    public JsonData changeLevel(@RequestParam String id,@RequestParam String level,@RequestParam Integer type){
+        videoService.changeLevel(id,level, type);
         return JsonData.buildSuccess();
+    }
+
+    /**
+     * 保存浏览记录
+     * @param type  类型
+     * @param id    id
+     * @param startData 开始时间
+     * @param watchTime 观看时间
+     * @return  null
+     */
+    @RequestMapping(value = "/saveViewHistory" , method = RequestMethod.POST)
+    @ResponseBody
+    public JsonData saveViewHistory(@RequestBody Integer type,@RequestBody Integer id,@RequestBody Integer startData,@RequestBody Integer watchTime){
+        videoService.saveViewHistory(type,id,startData,watchTime);
+        return null;
+    }
+
+    @GetMapping("/getWatchList")
+    @ResponseBody
+    public JsonData getWatchList(@RequestParam String idList){
+        //List<Integer> idList = videoAndIdList.getIdList();
+        List<Integer> parse = (List<Integer>) JSON.parse(idList);
+        return videoService.getWatchList(parse);
     }
 
     /**
@@ -297,6 +325,27 @@ public class VideoController {
 
         public void setFilemap(List<UpdateFileName> filemap) {
             this.filemap = filemap;
+        }
+    }
+
+    static class VideoAndIdList{
+        List<Integer> idList;
+        List<Video> videoList;
+
+        public List<Video> getVideoList() {
+            return videoList;
+        }
+
+        public void setVideoList(List<Video> videoList) {
+            this.videoList = videoList;
+        }
+
+        public List<Integer> getIdList() {
+            return idList;
+        }
+
+        public void setIdList(List<Integer> idList) {
+            this.idList = idList;
         }
     }
 }

@@ -5,12 +5,12 @@ import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.PictureMapper;
 import com.cxy.website.dao.PictureTypeMapper;
 import com.cxy.website.model.*;
-import com.cxy.website.service.ActorService;
-import com.cxy.website.service.PictureService;
-import com.cxy.website.service.TypeService;
+import com.cxy.website.model.sys.SysUser;
+import com.cxy.website.service.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.io.FileUtils;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +44,12 @@ public class PictureServiceImpl implements PictureService {
 
     @Autowired
     ActorService actorService;
+
+    @Autowired
+    LevelService levelService;
+
+    @Autowired
+    UserFavoriteService userFavoriteService;
 
     private static final Pattern COMIC_NAME = Pattern.compile("\\][^\\[\\]]+(\\[)?");
 
@@ -227,11 +233,22 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public Picture getPicture(Picture picture, Integer id) {
 
+        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         List<Actor> actors = actorService.findByPictureid(id);
         List<Type> types = typeService.findByPictureid(id);
         picture.setActors(actors);
         picture.setTypes(types);
         picture.setCoverUrl(CommonStatus.FILE_URL_PREFIX + picture.getCoverUrl());
+
+        Level level = levelService.findByProductionIdAndUserId(picture.getId(), user.getId(), CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE);
+        if (level != null) {
+            picture.setLevel(level.getLevel());
+        }
+
+        UserFavorite userFavorite = userFavoriteService.findByUserIdAndVideoId(user.getId(),CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE, id);
+        if (userFavorite != null) {
+            picture.setUserFavorite(userFavorite);
+        }
 
         List<String> addrlist = new ArrayList<String>();
         addrlist.add("K:\\resources/");
@@ -240,7 +257,7 @@ public class PictureServiceImpl implements PictureService {
         String address = "";
         for (String addr : addrlist) {
             address = addr + picture.getPictureUrl();
-            if(new File(address).exists()){
+            if (new File(address).exists()) {
                 break;
             }
         }
@@ -312,7 +329,7 @@ public class PictureServiceImpl implements PictureService {
             String oldAddress = source + File.separator + fileMap.getFilename();
             String newAddress = target + File.separator + suggestname;
             File file = new File(oldAddress);
-            if (!file.exists()||file.listFiles().length<=0) {
+            if (!file.exists() || file.listFiles().length <= 0) {
                 continue;
             }
             String coverName = this.moveFile(oldAddress, newAddress);

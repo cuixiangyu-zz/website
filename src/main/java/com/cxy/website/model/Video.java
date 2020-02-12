@@ -25,6 +25,16 @@ public class Video implements Serializable {
 
     private String level;
 
+    private UserFavorite userFavorite;
+
+    public UserFavorite getUserFavorite() {
+        return userFavorite;
+    }
+
+    public void setUserFavorite(UserFavorite userFavorite) {
+        this.userFavorite = userFavorite;
+    }
+
     public String getLevel() {
         return level;
     }

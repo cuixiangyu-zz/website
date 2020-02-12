@@ -26,15 +26,15 @@
             success:function(data){
 
                 for(var i = 0 ;i< data.japan.length;i++){
-                    var html = "<a href = http://192.168.1.23:8081/website/resources/japan/" + data.japan[i]+ ">"+data.japan[i]+"</a><div/>";
+                    var html = "<a href = http://192.168.1.8:5002/website/resources/japan/" + data.japan[i]+ ">"+data.japan[i]+"</a><div/>";
                     $("#japan").append(html);
                 }
                 for(var i = 0 ;i< data.american.length;i++){
-                    var html = "<a href = http://192.168.1.23:8081/website/resources/american/" + data.american[i]+ ">"+data.american[i]+"</a><div/>";
+                    var html = "<a href = http://192.168.1.8:5002/website/resources/american/" + data.american[i]+ ">"+data.american[i]+"</a><div/>";
                     $("#american").append(html);
                 }
                 for(var i = 0 ;i< data.suggest.length;i++){
-                    var html = "<a href = http://192.168.1.23:8081/website/resources/suggest/" + data.suggest[i]+ ">"+data.suggest[i]+"</a><div/>";
+                    var html = "<a href = http://192.168.1.8:5002/website/resources/suggest/" + data.suggest[i]+ ">"+data.suggest[i]+"</a><div/>";
                     $("#suggest").append(html);
                 }
 

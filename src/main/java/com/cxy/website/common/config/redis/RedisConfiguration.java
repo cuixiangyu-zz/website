@@ -1,3 +1,4 @@
+/*
 package com.cxy.website.common.config.redis;
 
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -23,12 +24,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+*/
 /**
  * redis配置器
  * 参考：RedisAutoConfiguration
  * @author zhao
  * @date 2019.1.16
- */
+ *//*
+
 @Configuration
 @EnableCaching
 public class RedisConfiguration extends CachingConfigurerSupport {
@@ -121,4 +124,4 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
-}
+}*/
