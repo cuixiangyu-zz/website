@@ -22,4 +22,5 @@ public interface ViewHistoryService {
      * @return  浏览历史
      */
     JsonData getHistory(Integer pageNum, Integer pageSize , Integer type, String startTime, String endTime);
+
 }

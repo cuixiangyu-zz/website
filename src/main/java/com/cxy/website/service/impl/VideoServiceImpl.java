@@ -231,7 +231,7 @@ public class VideoServiceImpl implements VideoService {
         addrlist.add("K:\\resources/");
         addrlist.add("I:\\resource/");
         addrlist.add("H:\\resources/");
-
+        addrlist.add("N:\\resources/");
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);

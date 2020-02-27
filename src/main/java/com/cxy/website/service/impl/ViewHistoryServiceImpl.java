@@ -15,6 +15,7 @@ import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +60,13 @@ public class ViewHistoryServiceImpl implements ViewHistoryService {
     public JsonData getHistory(Integer pageNum, Integer pageSize , Integer type, String startTime, String endTime) {
         SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         PageHelper.startPage(pageNum, pageSize);
-        List<ViewHistory> viewHistoryList = viewHistoryMapper.getHistory(user.getId(),type,startTime,endTime);
+        List<ViewHistory> viewHistoryList = new ArrayList<>();
+        if(type==null){
+            viewHistoryList = viewHistoryMapper.getVideoHistory(user.getId(),startTime,endTime);
+        }else{
+            viewHistoryList = viewHistoryMapper.getHistory(user.getId(),type,startTime,endTime);
+        }
+
         for (ViewHistory viewHistory : viewHistoryList) {
             if(viewHistory.getType()==5){
                 Picture picture = pictureService.findById(viewHistory.getVideoId());
@@ -80,4 +87,5 @@ public class ViewHistoryServiceImpl implements ViewHistoryService {
         PageInfo<ViewHistory> page = new PageInfo<ViewHistory>(viewHistoryList);
         return JsonData.buildSuccess(page);
     }
+
 }

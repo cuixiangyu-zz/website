@@ -15,6 +15,7 @@ import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -76,7 +77,12 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     public JsonData getList(Integer pageNum, Integer pageSize, Integer type,Integer level) {
         SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         PageHelper.startPage(pageNum,pageSize);
-        List<UserFavorite> userFavoriteList = userFavoriteMapper.getList(user.getId(),type,level);
+        List<UserFavorite> userFavoriteList = new ArrayList<>();
+        if(type!=null){
+            userFavoriteList = userFavoriteMapper.getList(user.getId(),type,level);
+        }else{
+            userFavoriteList = userFavoriteMapper.getVideoList(user.getId(),level);
+        }
         for (UserFavorite userFavorite : userFavoriteList) {
             if(userFavorite.getType()==5){
                 Picture picture = pictureService.findById(userFavorite.getVideoId());

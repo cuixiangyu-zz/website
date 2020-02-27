@@ -1,6 +1,5 @@
 package com.cxy.website.dao;
 
-import com.cxy.website.dao.sqlProvider.UserFavoriteSqlProvider;
 import com.cxy.website.model.UserFavorite;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
@@ -25,9 +24,6 @@ public interface UserFavoriteMapper {
     })
     int insert(UserFavorite record);
 
-    @InsertProvider(type = UserFavoriteSqlProvider.class, method = "insertSelective")
-    int insertSelective(UserFavorite record);
-
     @Select({
             "select",
             "id, user_id, type, video_id, creat_time",
@@ -43,8 +39,6 @@ public interface UserFavoriteMapper {
     })
     UserFavorite selectByPrimaryKey(Integer id);
 
-    @UpdateProvider(type = UserFavoriteSqlProvider.class, method = "updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(UserFavorite record);
 
     @Update({
             "update tb_user_favorite",
@@ -105,4 +99,31 @@ public interface UserFavoriteMapper {
             @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP)
     })
     UserFavorite selectByUserIdAndVideoId(Integer userId,Integer type, Integer videoId);
+
+    @Select({
+            "<script>",
+            "select",
+            "favorite.*",
+            "from tb_user_favorite favorite",
+            "<if test='level!=null'>",
+            "LEFT JOIN tb_level LEVEL ON favorite.video_id = LEVEL.production_id ",
+            "</if>",
+            "where favorite.user_id = #{userId,jdbcType=INTEGER}",
+            "<if test='level!=null'>",
+            "AND LEVEL.user_id = 1 ",
+            "AND LEVEL.production_type = 2 ",
+            "AND LEVEL.LEVEL = 4",
+            "</if>",
+            "and type <![CDATA[ <> ]]> 5",
+            "order by favorite.creat_time desc",
+            "</script>",
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "user_id", property = "userId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "video_id", property = "videoId", jdbcType = JdbcType.INTEGER),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP)
+    })
+    List<UserFavorite> getVideoList(Integer userId, Integer level);
 }
