@@ -1,5 +1,5 @@
 server:
-  port: 5002
+  port: 5003
   servlet:
     context-path: /website
   tomcat:
@@ -69,7 +69,7 @@ spring:
   mvc:
     static-path-pattern: /resources/**
   resources:
-    static-locations: classpath:/static/,classpath:/public,classpath:/resources/,classpath:/META-INF/resources,file:K:\resources/,file:G:\COVER/
+    static-locations: classpath:/static/,classpath:/public,classpath:/resources/,classpath:/META-INF/resources,file:K:\resources/,file:N:\COVER/
       ,file:I:\resource/,file:H:\resources/,file:N:\resources/
 
   #    classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,
@@ -89,4 +89,7 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-
+file:
+  url:
+#    prefix: http://www.caesium.top:5003/website/resources
+    prefix: http://192.168.1.11:5003/website/resources

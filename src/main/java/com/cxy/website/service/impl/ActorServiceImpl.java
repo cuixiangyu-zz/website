@@ -13,6 +13,7 @@ import com.cxy.website.service.VideoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +39,9 @@ public class ActorServiceImpl implements ActorService {
 
     @Autowired
     LevelService levelService;
+
+    @Value("${file.url.prefix}")
+    private String FILE_URL_PREFIX ;
 
     /**
      * 添加
@@ -182,7 +186,7 @@ public class ActorServiceImpl implements ActorService {
         PageHelper.startPage(pageNum, pageSize);
         List<Actor> actors = actorMapper.selectAll();
         for (Actor actor : actors) {
-            String address = CommonStatus.FILE_URL_PREFIX + actor.getCoverUrl();
+            String address = FILE_URL_PREFIX + actor.getCoverUrl();
             actor.setCoverUrl(address);
         }
         PageInfo<Actor> page = new PageInfo<Actor>(actors);

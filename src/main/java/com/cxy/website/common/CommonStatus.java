@@ -1,5 +1,8 @@
 package com.cxy.website.common;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +13,7 @@ import java.util.List;
  * @author: CuiXiangYu
  * @create: 2019-11-08 10:16
  **/
+@Component
 public class CommonStatus {
 
     public static final Integer ACTOR_TYPE_JAPAN = 1;
@@ -47,9 +51,12 @@ public class CommonStatus {
     public static final Integer FAVORITE_HISTORY_TYPE_SMALL_VIDEO = 4;
     public static final Integer FAVORITE_HISTORY_TYPE_PICTURE = 5;
 
-    public static final String FILE_ADDRESS_PREFIX = "K:\\resources";
-    public static final String FILE_URL_PREFIX = "http://192.168.1.17:5002/website/resources";
-//public static final String FILE_URL_PREFIX = "http://www.caesium.top:5002/website/resources";
-    public static final String FILE_COVER_PREFIX = "G:/COVER";
+    //public static final String FILE_URL_PREFIX = "http://192.168.1.18:5002/website/resources";
 
+    @Value("${server.port}")
+    public static String FILE_URL_PREFIX ;
+
+    public static final String FILE_COVER_PREFIX = "N:/COVER";
+
+    public static final String[] addrs = {"L:\\resources/","K:\\resources/","I:\\resource/","H:\\resources/","N:\\resources/"};
 }

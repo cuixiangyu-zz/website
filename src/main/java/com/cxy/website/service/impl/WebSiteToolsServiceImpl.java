@@ -43,6 +43,8 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
     private static final Pattern VIDEO_TITLE_PATTERN = Pattern.compile("<title>.*</title>");
 
 
+
+
     /**
      * 根据url下载图片并保存到本地
      *
@@ -126,7 +128,7 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         String picurl = "";
         try {
             //建立连接
-            URL url = new URL("https://www.javbus.zone/" + id);
+            URL url = new URL("https://www.busjav.cloud//" + id);
             // URL url = new URL("https://www.seedmm.in/" + id);
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
             httpUrlConn.setDoInput(true);

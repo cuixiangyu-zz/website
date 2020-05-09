@@ -12,6 +12,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -50,6 +51,9 @@ public class PictureServiceImpl implements PictureService {
 
     @Autowired
     UserFavoriteService userFavoriteService;
+
+    @Value("${file.url.prefix}")
+    private String FILE_URL_PREFIX ;
 
     private static final Pattern COMIC_NAME = Pattern.compile("\\][^\\[\\]]+(\\[)?");
 
@@ -238,7 +242,7 @@ public class PictureServiceImpl implements PictureService {
         List<Type> types = typeService.findByPictureid(id);
         picture.setActors(actors);
         picture.setTypes(types);
-        picture.setCoverUrl(CommonStatus.FILE_URL_PREFIX + picture.getCoverUrl());
+        picture.setCoverUrl(FILE_URL_PREFIX + picture.getCoverUrl());
 
         Level level = levelService.findByProductionIdAndUserId(picture.getId(), user.getId(), CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE);
         if (level != null) {
@@ -250,12 +254,13 @@ public class PictureServiceImpl implements PictureService {
             picture.setUserFavorite(userFavorite);
         }
 
-        List<String> addrlist = new ArrayList<String>();
+        /*List<String> addrlist = new ArrayList<String>();
         addrlist.add("K:\\resources/");
         addrlist.add("I:\\resource/");
-        addrlist.add("H:\\resources/");
+        addrlist.add("H:\\resources/");*/
+
         String address = "";
-        for (String addr : addrlist) {
+        for (String addr : CommonStatus.addrs) {
             address = addr + picture.getPictureUrl();
             if (new File(address).exists()) {
                 break;
@@ -265,7 +270,7 @@ public class PictureServiceImpl implements PictureService {
         File[] files = root.listFiles();
         List<String> piclist = new ArrayList<>();
         for (File picfile : files) {
-            piclist.add(CommonStatus.FILE_URL_PREFIX + picture.getPictureUrl() + File.separator + picfile.getName());
+            piclist.add(FILE_URL_PREFIX + picture.getPictureUrl() + File.separator + picfile.getName());
         }
         picture.setAddress(piclist);
         return picture;

@@ -11,6 +11,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -47,6 +48,9 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     UserFavoriteService userFavoriteService;
+
+    @Value("${file.url.prefix}")
+    private String FILE_URL_PREFIX ;
 
     private static final Pattern VIDEO_AMERICAN_PATTERN = Pattern.compile("[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}");
     /**
@@ -226,12 +230,12 @@ public class VideoServiceImpl implements VideoService {
         if(oldlevel!=null){
             video.setLevel(oldlevel.getLevel());
         }
-
+/*
         List<String> addrlist = new ArrayList<String>();
         addrlist.add("K:\\resources/");
         addrlist.add("I:\\resource/");
         addrlist.add("H:\\resources/");
-        addrlist.add("N:\\resources/");
+        addrlist.add("N:\\resources/");*/
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);
@@ -247,9 +251,9 @@ public class VideoServiceImpl implements VideoService {
 
         video.setActors(actors);
         video.setTypes(types);
-        video.setCoverUrl(CommonStatus.FILE_URL_PREFIX+video.getCoverUrl());
+        video.setCoverUrl(FILE_URL_PREFIX+video.getCoverUrl());
         String address = "";
-        for (String addr : addrlist) {
+        for (String addr : CommonStatus.addrs) {
             address = addr + video.getVideoUrl();
             if(new File(address).exists()){
                 break;
@@ -258,12 +262,12 @@ public class VideoServiceImpl implements VideoService {
         File root = new File(address);
         List<String> piclist = new ArrayList<>();
         if(root.isFile()){
-            piclist.add(CommonStatus.FILE_URL_PREFIX+video.getVideoUrl());
+            piclist.add(FILE_URL_PREFIX+video.getVideoUrl());
         }else if(root.isDirectory()){
             File[] files = root.listFiles();
 
             for (File picfile : files) {
-                piclist.add(CommonStatus.FILE_URL_PREFIX+video.getVideoUrl()+File.separator+picfile.getName());
+                piclist.add(FILE_URL_PREFIX+video.getVideoUrl()+File.separator+picfile.getName());
             }
         }
 

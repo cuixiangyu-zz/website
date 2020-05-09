@@ -36,20 +36,16 @@ public class MyShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        System.out.println("权限判断-->MyShiroRealm.doGetAuthorizationInfo()");
+        log.info("权限判断-->MyShiroRealm.doGetAuthorizationInfo()");
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         //如果授权部分没有传入User对象，这里只能取到userName
         //也就是SimpleAuthenticationInfo构造的时候第一个参数传递需要User对象
         SysUser user = (SysUser) principalCollection.getPrimaryPrincipal();
-
-        for ( SysRole role : user.getSysUserRoleList()) {
-            authorizationInfo.addRole(role.getRoleName());
-        }
-
         for (SysMenu menu : user.getSysUserMenuList()) {
             authorizationInfo.addStringPermission(menu.getPermission());
         }
         return authorizationInfo;
+
     }
 
     @Override
@@ -66,11 +62,10 @@ public class MyShiroRealm extends AuthorizingRealm {
             log.info("普通用户身份认证-->MyShiroRealm.doGetAuthenticationInfo()");
             //获取用户的输入的账号.
             String userName = (String) authenticationToken.getPrincipal();
-//        System.out.println(token.getCredentials());
             //通过username从数据库中查找 User对象，如果找到，没找到.
             //实际项目中，这里可以根据实际情况做缓存，如果不做，Shiro自己也是有时间间隔机制，2分钟内不会重复执行该方法
             SysUser user = userService.findByUserName(userName);
-            System.out.println("-->>user=" + user);
+            log.info("-->>user=" + user);
             if (user == null) {
                 throw new UnknownAccountException();
             }
@@ -82,7 +77,7 @@ public class MyShiroRealm extends AuthorizingRealm {
                     getName()  //realm name
             );
             return authenticationInfo;
-        }else {
+        } else {
             return null;
         }
 

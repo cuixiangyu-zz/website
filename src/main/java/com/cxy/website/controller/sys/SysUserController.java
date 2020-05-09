@@ -48,7 +48,6 @@ public class SysUserController {
      *@Author 侯森林
      *@Date 2019-9-18
      */
-    @RequiresPermissions("nurse")
     @RequestMapping(value="/getUserList")
     //@RequiresPermissions("user:view")//权限管理;
     @ResponseBody
