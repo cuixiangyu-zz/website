@@ -3,6 +3,9 @@ package com.cxy.website.controller;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.VideoUtil;
 import com.cxy.website.common.util.web.JsonData;
+import com.cxy.website.dao.PictureMapper;
+import com.cxy.website.dao.VideoMapper;
+import com.cxy.website.model.Picture;
 import com.cxy.website.model.Video;
 import com.cxy.website.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.xml.crypto.Data;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: website
@@ -30,11 +34,17 @@ public class UtilController {
     @Autowired
     VideoService videoService;
 
+    @Autowired
+    VideoMapper videoMapper;
+
+    @Autowired
+    PictureMapper   pictureMapper;
+
     @GetMapping("/savePornVideo")
     public JsonData savePornVideo(){
-        String videoPath = "N:\\newFile/";
-        String picPath = "G:\\COVER\\pornHub/";
-        String newPath = "N:\\resources\\pornHub/";
+        String videoPath = "J:\\新建文件夹";
+        String picPath = "H:\\COVER\\pornHub/";
+        String newPath = "J:\\resources\\pornHub/";
         File videos = new File(videoPath);
         for (File file : videos.listFiles()) {
             String videoName = file.getName().substring(0,file.getName().length()-4);
@@ -48,6 +58,78 @@ public class UtilController {
             video.setCoverUrl(File.separator+"pornHub"+File.separator+videoName + ".jpg");
             videoService.add(video);
             file.renameTo(new File(newPath+file.getName()));
+        }
+
+        return JsonData.buildSuccess();
+    }
+
+    @GetMapping("/checkVideo")
+    public JsonData checkVideo(){
+        String prefix = "/mnt/";
+        List<Video> videoList =  videoMapper.findAll();
+        for (Video video : videoList) {
+            boolean exist = false;
+            String fileAddr = null;
+            for (String addr : CommonStatus.addrs) {
+                String address =prefix + addr + "/resources" + video.getVideoUrl();
+                address = address.replaceAll("\\\\","|");
+                address = address.replaceAll("\\|","/");
+                System.out.println(address);
+                File file = new File(address);
+                if(file.exists()){
+                    fileAddr = File.separator+addr + "/resources" + video.getVideoUrl();
+                    fileAddr = fileAddr.replaceAll("\\\\","|");
+                    fileAddr = fileAddr.replaceAll("\\|","/");
+                    exist = true;
+                    break;
+                }
+            }
+            if(exist){
+                video.setExist(1);
+                String coverUrl = "/8t-2/cover"+video.getCoverUrl();
+                coverUrl = coverUrl.replaceAll("\\\\","|");
+                coverUrl = coverUrl.replaceAll("\\|","/");
+                video.setCoverUrl(coverUrl);
+                video.setVideoUrl(fileAddr);
+            }else{
+                String coverUrl = "/8t-2/cover"+video.getCoverUrl();
+                coverUrl = coverUrl.replaceAll("\\\\","|");
+                coverUrl = coverUrl.replaceAll("\\|","/");
+                video.setCoverUrl(coverUrl);
+                video.setExist(0);
+            }
+            videoMapper.updateByPrimaryKey(video);
+        }
+
+        List<Picture> pictureList = pictureMapper.findAll();
+        for (Picture picture : pictureList) {
+            boolean exist = false;
+            String fileAddr = null;
+            String picAddr = null;
+            for (String addr : CommonStatus.addrs) {
+                String address =prefix + addr + "/resources" + picture.getPictureUrl();
+                address = address.replaceAll("\\\\","|");
+                address = address.replaceAll("\\|","/");
+                File file = new File(address);
+                if(file.exists()){
+                    fileAddr = File.separator+addr + "/resources" + picture.getPictureUrl();
+                    fileAddr = fileAddr.replaceAll("\\\\","|");
+                    fileAddr = fileAddr.replaceAll("\\|","/");
+                    picAddr = File.separator+addr + "/resources" + picture.getCoverUrl();
+                    picAddr = picAddr.replaceAll("\\\\","|");
+                    picAddr = picAddr.replaceAll("\\|","/");
+                    exist = true;
+                    break;
+                }
+            }
+            if(exist){
+                picture.setExist(1);
+                picture.setCoverUrl(picAddr);
+                picture.setPictureUrl(fileAddr);
+            }else{
+                picture.setExist(0);
+            }
+            pictureMapper.updateByPrimaryKey(picture);
         }
 
         return JsonData.buildSuccess();

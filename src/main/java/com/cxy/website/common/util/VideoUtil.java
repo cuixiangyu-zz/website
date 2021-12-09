@@ -73,7 +73,7 @@ public class VideoUtil {
             File picFile = new File(picPath);
             ImageIO.write(thumbnailImage, "jpg", picFile);
             ff.stop();
-        } catch (IOException | FrameGrabber.Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

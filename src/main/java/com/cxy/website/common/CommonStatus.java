@@ -1,5 +1,6 @@
 package com.cxy.website.common;
 
+import org.bytedeco.javacpp.presets.opencv_core;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,10 +54,16 @@ public class CommonStatus {
 
     //public static final String FILE_URL_PREFIX = "http://192.168.1.18:5002/website/resources";
 
+    public static final String JAPAN_URL = "https://www.busjav.cam//";
+
+    public static final String AMERICAN_URL = "https://www.javbus.one/";
+
     @Value("${server.port}")
     public static String FILE_URL_PREFIX ;
 
     public static final String FILE_COVER_PREFIX = "N:/COVER";
 
-    public static final String[] addrs = {"L:\\resources/","K:\\resources/","I:\\resource/","H:\\resources/","N:\\resources/"};
+    public static final String FILE_LINUX_ADDR = "/mnt";
+    public static final String[] WINDOWS_ADDRS = {"L:\\resources/","K:\\resources/","I:\\resource/","H:\\resources/","N:\\resources/"};
+    public static final String[] addrs = {"1t-3","2t-1","4t-1","8t-1","8t-2"};
 }

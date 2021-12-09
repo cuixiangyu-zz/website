@@ -217,6 +217,11 @@ public class VideoController {
         return videoService.getWatchList(parse);
     }
 
+    @GetMapping("/suggestVideo")
+    @ResponseBody
+    public JsonData suggestVideo(@RequestParam String id){
+        return videoService.suggestVideo(id);
+    }
     /**
      * 分页查询条件实体类
      */

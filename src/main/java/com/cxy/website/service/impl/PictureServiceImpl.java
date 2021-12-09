@@ -253,19 +253,19 @@ public class PictureServiceImpl implements PictureService {
         if (userFavorite != null) {
             picture.setUserFavorite(userFavorite);
         }
-
-        /*List<String> addrlist = new ArrayList<String>();
-        addrlist.add("K:\\resources/");
-        addrlist.add("I:\\resource/");
-        addrlist.add("H:\\resources/");*/
-
-        String address = "";
-        for (String addr : CommonStatus.addrs) {
-            address = addr + picture.getPictureUrl();
-            if (new File(address).exists()) {
-                break;
+        String address = null;
+        if(System.getProperty("os.name").toLowerCase().contains("linux")){
+            address = CommonStatus.FILE_LINUX_ADDR + picture.getPictureUrl();
+        }else if(System.getProperty("os.name").toLowerCase().contains("windows")){
+            for (String addr : CommonStatus.WINDOWS_ADDRS) {
+                address = addr + picture.getPictureUrl();
+                if (new File(address).exists()) {
+                    break;
+                }
             }
         }
+
+
         File root = new File(address);
         File[] files = root.listFiles();
         List<String> piclist = new ArrayList<>();
@@ -290,6 +290,12 @@ public class PictureServiceImpl implements PictureService {
         for (File listFile : file.listFiles()) {
             UpdateFileName updateFileName = new UpdateFileName();
             String picName = listFile.getName();
+            if(picName.indexOf("[Digital]")>0){
+                picName = picName.replace("[Digital]","");
+            }
+            if(picName.indexOf("[")>1){
+                picName = picName.substring(0,picName.indexOf("["));
+            }
             if (!picName.contains("[")) {
                 updateFileName.setFilename(picName);
                 updateFileName.setSuggestname(picName);

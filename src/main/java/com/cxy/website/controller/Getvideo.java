@@ -30,7 +30,7 @@ public class Getvideo {
         List<String> suggest = new ArrayList<>();
         Map<String,List<String>> videos = new HashMap<>();
 
-        File file = new File("K:\\resources");
+        File file = new File("H:\\电视剧");
         File[] files = file.listFiles();
         for (File file1 : files) {
             if("japan".equals(file1.getName())){

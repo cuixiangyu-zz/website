@@ -1,5 +1,6 @@
 package com.cxy.website.service.impl;
 
+import com.cxy.website.common.CommonStatus;
 import com.cxy.website.service.DownloadPic;
 import com.cxy.website.service.WebSiteToolsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
     /**
      * 影片图片
      */
-    private static final Pattern VIDEO_COVER_PATTERN = Pattern.compile("img src=\"https://.*/cover/.*.jpg");
+    //private static final Pattern VIDEO_COVER_PATTERN = Pattern.compile("img src=\"https://.*/cover/.*.jpg");
+    private static final Pattern VIDEO_COVER_PATTERN = Pattern.compile("img src=\".*/cover/.*.jpg");
 
     /**
      * 影片标题
@@ -128,7 +130,7 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         String picurl = "";
         try {
             //建立连接
-            URL url = new URL("https://www.busjav.cloud//" + id);
+            URL url = new URL(CommonStatus.JAPAN_URL + id);
             // URL url = new URL("https://www.seedmm.in/" + id);
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
             httpUrlConn.setDoInput(true);
@@ -196,7 +198,7 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         coversrc.put("category", category);
         coversrc.put("artists", artists);
         coversrc.put("title", title);
-        coversrc.put("picurl", picurl);
+        coversrc.put("picurl", "https://www.busjav.cam"+picurl);
         return coversrc;
     }
 

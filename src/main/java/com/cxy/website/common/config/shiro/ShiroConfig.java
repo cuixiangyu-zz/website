@@ -100,6 +100,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/videos", "anon");
         filterChainDefinitionMap.put("/get", "anon");
 
+        filterChainDefinitionMap.put("/rabbitMq/**", "anon");
+
         filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/phone", "anon");
         filterChainDefinitionMap.put("/web", "anon");

@@ -234,4 +234,12 @@ public interface PictureMapper {
     })
     @Cacheable
     List<Picture> selectPageList(String actorName, String pictureName,String language, List<String> types);
+
+    @Select({
+            "select",
+            "id, name,  picture_url, cover_url, creat_time, creater, type, number, ",
+            "language, exist, remark",
+            "from tb_picture"
+    })
+    List<Picture> findAll();
 }

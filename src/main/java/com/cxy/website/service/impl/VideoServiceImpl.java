@@ -49,6 +49,9 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     UserFavoriteService userFavoriteService;
 
+    @Autowired
+    ArrangeVideos arrangeVideos;
+
     @Value("${file.url.prefix}")
     private String FILE_URL_PREFIX ;
 
@@ -252,11 +255,15 @@ public class VideoServiceImpl implements VideoService {
         video.setActors(actors);
         video.setTypes(types);
         video.setCoverUrl(FILE_URL_PREFIX+video.getCoverUrl());
-        String address = "";
-        for (String addr : CommonStatus.addrs) {
-            address = addr + video.getVideoUrl();
-            if(new File(address).exists()){
-                break;
+        String address = null;
+        if(System.getProperty("os.name").toLowerCase().contains("linux")){
+            address = CommonStatus.FILE_LINUX_ADDR + video.getVideoUrl();
+        }else if(System.getProperty("os.name").toLowerCase().contains("windows")){
+            for (String addr : CommonStatus.WINDOWS_ADDRS) {
+                address = addr + video.getVideoUrl();
+                if (new File(address).exists()) {
+                    break;
+                }
             }
         }
         File root = new File(address);
@@ -288,8 +295,13 @@ public class VideoServiceImpl implements VideoService {
 
         if (filemap != null && filemap.size() > 0) {
             for (UpdateFileName updateFileName : filemap) {
-                UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService, levelService);
-                updateFile.update();
+                Video video = videoMapper.valudate(updateFileName.getSuggestname().substring(0,updateFileName.getSuggestname().indexOf(".")));
+                if(video!=null){
+                    continue;
+                }
+                /*UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService, levelService);
+                updateFile.update();*/
+                arrangeVideos.update(source,target,type,updateFileName);
             }
         }
         actorService.updateLevel(null);
@@ -446,6 +458,15 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public JsonData getWatchList(List<Integer> idList) {
         List<Video> videoList = videoMapper.selectByIdList(idList);
+        for (Video video : videoList) {
+            video = getVideo(video, video.getId());
+        }
+        return JsonData.buildSuccess(videoList);
+    }
+
+    @Override
+    public JsonData suggestVideo(String id) {
+        List<Video> videoList = videoMapper.getSuggestVideo(id);
         for (Video video : videoList) {
             video = getVideo(video, video.getId());
         }

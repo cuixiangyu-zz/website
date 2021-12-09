@@ -2,6 +2,7 @@ package com.cxy.website.dao;
 
 import com.cxy.website.dao.sqlProvider.VideoSqlProvider;
 import com.cxy.website.model.Picture;
+import com.cxy.website.model.UpdateFileName;
 import com.cxy.website.model.Video;
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.annotations.*;
@@ -169,7 +170,7 @@ public interface VideoMapper {
             " left join tb_video_type viotyp on vio.id = viotyp.video_id",
             " left join tb_type typ on viotyp.type_id = typ.id",
             "</if>",
-            "where 1=1 and vio.type = #{videoType,jdbcType=INTEGER}",
+            "where 1=1 and vio.exist = 1 and vio.type = #{videoType,jdbcType=INTEGER}",
             "<if test='types !=null'>",
             "and typ.id in",
             "<foreach collection='types' item='type'  open='(' separator=',' close=')'>",
@@ -230,4 +231,59 @@ public interface VideoMapper {
             @Result(column = "level", property = "level", jdbcType = JdbcType.VARCHAR)
     })
     List<Video> selectByIdList(@Param("idList") List<Integer> idList);
+
+    @Select({
+            "<script>",
+            "select",
+            "vid.*",
+            "from tb_video vid",
+            "where name like '%${updateFileName}%' ",
+            "</script>"
+    })
+    Video valudate(@Param("updateFileName") String updateFileName);
+
+    @Select({
+            "select",
+            "id, name,  video_url, cover_url, creat_time, creater, type, exist, remark",
+            "from tb_video",
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    List<Video> findAll();
+
+    @Select({
+            "SELECT * FROM tb_video ",
+            "WHERE id IN (",
+            "SELECT video_id FROM (",
+            "SELECT videotype.video_id FROM tb_video_type videotype ",
+            "LEFT JOIN tb_video video ON videotype.video_id = video.id ",
+            "WHERE video.exist = 1 ",
+            "AND videotype.type_id IN ( SELECT type_id FROM tb_video_type WHERE video_id = #{id} ) ",
+            "AND videotype.video_id <> #{id} ",
+            "GROUP BY videotype.video_id ",
+            "ORDER BY count( videotype.type_id ) DESC  LIMIT 15  ) tt )"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    List<Video> getSuggestVideo(String id);
 }

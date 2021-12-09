@@ -92,4 +92,6 @@ public interface VideoService {
     void saveViewHistory(Integer type, Integer id, Integer startData, Integer watchTime);
 
     JsonData getWatchList(List<Integer> idList);
+
+    JsonData suggestVideo(String id);
 }
