@@ -1,6 +1,5 @@
 package com.cxy.website.controller;
 
-import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.*;
 import com.cxy.website.service.ActorService;
@@ -11,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -145,10 +142,17 @@ public class PictureController {
     @ResponseBody
     public JsonData getDetil(@RequestParam Integer id){
         Picture picture = pictureService.findById(id);
-        picture = pictureService.getPicture(picture,id);
+        picture = pictureService.getPicture(picture,id, null);
         return JsonData.buildSuccess(picture);
     }
 
+    @RequestMapping(value = "/getNext" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData getNext(@RequestParam Integer id,@RequestParam String type){
+        Picture picture = pictureService.findNextById(id,type);
+        picture = pictureService.getPicture(picture,id, null);
+        return JsonData.buildSuccess(picture);
+    }
 
 
     @RequestMapping(value = "/getPageList" , method = RequestMethod.POST)

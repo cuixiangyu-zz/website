@@ -2,14 +2,8 @@ package com.cxy.website.dao;
 
 import com.cxy.website.dao.sqlProvider.PictureSqlProvider;
 import com.cxy.website.model.Picture;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.annotations.UpdateProvider;
+import com.cxy.website.model.Video;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -52,7 +46,7 @@ public interface PictureMapper {
         "id, name,  picture_url, cover_url, creat_time, creater, type, number, ",
         "language, exist, remark",
         "from tb_picture",
-        "where id = #{id,jdbcType=INTEGER}"
+        "where id = #{id,jdbcType=INTEGER} order by creat_time desc"
     })
     @Results({
         @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -98,7 +92,7 @@ public interface PictureMapper {
             "id, name,  picture_url, cover_url, creat_time, creater, type, number, ",
             "language, exist, remark",
             "from tb_picture",
-            "where name = #{name,jdbcType=VARCHAR}"
+            "where name = #{name,jdbcType=VARCHAR} order by creat_time desc"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -124,7 +118,7 @@ public interface PictureMapper {
             "from tb_picture pic",
             "left join tb_picture_actor picact on pic.id = picact.picture_id ",
             "left join tb_actor act on picact.actor_id = act.id",
-            "where act.id = #{id,jdbcType=INTEGER}"
+            "where act.id = #{id,jdbcType=INTEGER} order by pic.creat_time desc"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -147,7 +141,7 @@ public interface PictureMapper {
             "id, name,  picture_url, cover_url, creat_time, creater, type, number, ",
             "language, exist, remark",
             "from tb_picture",
-            "where type = #{type,jdbcType=INTEGER}"
+            "where type = #{type,jdbcType=INTEGER} order by creat_time desc"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -171,7 +165,7 @@ public interface PictureMapper {
             "id, name,  picture_url, cover_url, creat_time, creater, type, number, ",
             "language, exist, remark",
             "from tb_picture",
-            "where language = #{language,jdbcType=VARCHAR}"
+            "where language = #{language,jdbcType=VARCHAR} order by creat_time desc"
     })
     @Results({
             @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
@@ -216,7 +210,7 @@ public interface PictureMapper {
             "<if test='language !=null'>",
             "and pic.language = #{language}",
             "</if>",
-            "GROUP BY pic.id",
+            "GROUP BY pic.id order by pic.creat_time desc",
             "</script>"
     })
     @Results({
@@ -242,4 +236,60 @@ public interface PictureMapper {
             "from tb_picture"
     })
     List<Picture> findAll();
+
+    @Select({
+            "<script>",
+            "select * from tb_picture WHERE  exist = 1 ",
+            "<if test='type ==\"next\"'>",
+            " <![CDATA[and id > #{id}]]>",
+            "</if>",
+            "<if test='type ==\"pre\"'>",
+            " <![CDATA[and id < #{id}]]>",
+            "</if>",
+            " ORDER BY id LIMIT 0,1; ",
+            "</script>"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+
+            @Result(column="picture_url", property="pictureUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="cover_url", property="coverUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creat_time", property="creatTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="creater", property="creater", jdbcType=JdbcType.VARCHAR),
+            @Result(column="type", property="type", jdbcType=JdbcType.INTEGER),
+            @Result(column="number", property="number", jdbcType=JdbcType.INTEGER),
+            @Result(column="language", property="language", jdbcType=JdbcType.VARCHAR),
+            @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
+            @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
+    })
+    Picture findNextById(Integer id, String type);
+
+    @Select({
+            "<script>",
+            "select * from tb_picture WHERE  exist = 1 ",
+            "<if test='next ==\"next\"'>",
+            "  ORDER BY id ",
+            "</if>",
+            "<if test='next ==\"pre\"'>",
+            "  ORDER BY id desc",
+            "</if>",
+            " LIMIT 0,1; ",
+            "</script>"
+    })
+    @Results({
+            @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+
+            @Result(column="picture_url", property="pictureUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="cover_url", property="coverUrl", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creat_time", property="creatTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="creater", property="creater", jdbcType=JdbcType.VARCHAR),
+            @Result(column="type", property="type", jdbcType=JdbcType.INTEGER),
+            @Result(column="number", property="number", jdbcType=JdbcType.INTEGER),
+            @Result(column="language", property="language", jdbcType=JdbcType.VARCHAR),
+            @Result(column="exist", property="exist", jdbcType=JdbcType.INTEGER),
+            @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
+    })
+    Picture findFirst( @Param("next")String next);
 }

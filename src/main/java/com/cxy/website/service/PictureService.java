@@ -1,11 +1,9 @@
 package com.cxy.website.service;
 
 import com.cxy.website.common.util.web.JsonData;
-import com.cxy.website.model.Level;
 import com.cxy.website.model.Picture;
 import com.cxy.website.model.UpdateFileName;
 import com.github.pagehelper.PageInfo;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -77,7 +75,7 @@ public interface PictureService {
      */
     JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName,String language, List<List<Object>> types);
 
-    public Picture getPicture(Picture picture, Integer id);
+    public Picture getPicture(Picture picture, Integer id, String type);
 
     /**
      * 根据地址获取文件夹下所有图片并重命名
@@ -94,4 +92,10 @@ public interface PictureService {
      * @param type  类型
      */
     void updatePicsFromLocal(String source, String target, List<UpdateFileName> fileMap, String type);
+
+    public List<String> getAddress(Picture picture);
+
+    public String getCover(Picture picture);
+
+    Picture findNextById(Integer id, String type);
 }

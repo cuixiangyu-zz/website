@@ -29,9 +29,10 @@ public interface WebSiteToolsService {
     /**
      * 根据影片id查找影片基本信息
      * @param id 影片id
+     * @param type
      * @return 影片基本信息
      */
-    Map<String,Object> getvideoinfo(String id);
+    Map<String,Object> getvideoinfo(String id, String type);
 
     /**
      * 重命名文件

@@ -22,6 +22,8 @@ public class RabbitMqConfig {
     public static final String MOVE_VIDEO_QUEUE_NAME = "move_video_queue";
     public static final String ARTIST_NAME_QUEUE_NAME = "artist_name_queue";
     public static final String COVER_URL_QUEUE_NAME = "cover_url_queue";
+    public static final String CREAT_VIDEO_COVER_QUEUE_NAME = "video_cover_queue";
+    public static final String REFRESH_COVER_QUEUE_NAME = "refresh_cover_queue";
 
     //交换机名
     public static final String DIRECT_EXCHANGE = "DirectExchange";
@@ -36,6 +38,8 @@ public class RabbitMqConfig {
     public static final String ARTIST_NAME_DIRECT_ROUTING_KEY = "artist_name";
     public static final String COVER_URL_DIRECT_ROUTING_KEY = "cover_url";
     public static final String MOVE_VIDEO_DIRECT_ROUTING_KEY = "move_video";
+    public static final String CREAT_VIDEO_COVER_ROUTING_KEY = "video_cover";
+    public static final String REFRESH_COVER_ROUTING_KEY = "refresh_cover";
 
     //创建队列
     @Bean
@@ -56,6 +60,16 @@ public class RabbitMqConfig {
     @Bean
     public Queue createCoverUrlQueue() {
         return new Queue(COVER_URL_QUEUE_NAME);
+    }
+
+    @Bean
+    public Queue createVideoCoverQueue() {
+        return new Queue(CREAT_VIDEO_COVER_QUEUE_NAME);
+    }
+
+    @Bean
+    public Queue createRefreshCoverQueue() {
+        return new Queue(REFRESH_COVER_QUEUE_NAME);
     }
 
     //创建交换机
@@ -91,6 +105,20 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(createCoverUrlQueue()).
                 to(directExchange()).
                 with(COVER_URL_DIRECT_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding bindingVideoCoverDirect() {
+        return BindingBuilder.bind(createVideoCoverQueue()).
+                to(directExchange()).
+                with(CREAT_VIDEO_COVER_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding bindingRefreshCoverDirect() {
+        return BindingBuilder.bind(createRefreshCoverQueue()).
+                to(directExchange()).
+                with(REFRESH_COVER_ROUTING_KEY);
     }
 
     /*//创建队列

@@ -49,4 +49,20 @@ public class MsgProducer {
     public void sendToMoveVideo(JSONObject jsonObject){
         rabbitTemplate.convertAndSend(RabbitMqConfig.DIRECT_EXCHANGE,RabbitMqConfig.MOVE_VIDEO_DIRECT_ROUTING_KEY,jsonObject.toJSONString());
     }
+
+    /**
+     * 移动影片队列
+     * @param jsonObject
+     */
+    public void sendToVideoCover(JSONObject jsonObject){
+        rabbitTemplate.convertAndSend(RabbitMqConfig.DIRECT_EXCHANGE,RabbitMqConfig.CREAT_VIDEO_COVER_ROUTING_KEY,jsonObject.toJSONString());
+    }
+
+    /**
+     * 重新下载封面
+     * @param jsonObject
+     */
+    public void sendToRefreshCover(JSONObject jsonObject){
+        rabbitTemplate.convertAndSend(RabbitMqConfig.DIRECT_EXCHANGE,RabbitMqConfig.REFRESH_COVER_ROUTING_KEY,jsonObject.toJSONString());
+    }
 }

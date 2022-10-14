@@ -1,18 +1,21 @@
 package com.cxy.website.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.cxy.website.common.CommonStatus;
+import com.cxy.website.common.util.RandomUtils;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.VideoMapper;
 import com.cxy.website.model.*;
 import com.cxy.website.model.sys.SysUser;
 import com.cxy.website.service.*;
+import com.cxy.website.service.rabbitMqService.MsgProducer;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.util.*;
@@ -52,8 +55,12 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     ArrangeVideos arrangeVideos;
 
-    @Value("${file.url.prefix}")
-    private String FILE_URL_PREFIX ;
+    @Autowired
+    private MsgProducer msgProducer;
+
+    @Autowired
+    RestTemplate restTemplate;
+
 
     private static final Pattern VIDEO_AMERICAN_PATTERN = Pattern.compile("[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}");
     /**
@@ -102,6 +109,58 @@ public class VideoServiceImpl implements VideoService {
     public Video findByid(int id) {
         Video video = videoMapper.selectByPrimaryKey(id);
         return video;
+    }
+
+    @Override
+    public List<Video> checkExist(String name) {
+        List<Video> videos = videoMapper.checkExist(name);
+        return videos;
+    }
+
+    @Override
+    public Video findNextByid(Integer id,String type) {
+        Video video = videoMapper.selectByPrimaryKey(id);
+        Video nextVideo = new Video();
+        if(video.getType().equals(CommonStatus.ACTOR_TYPE_JAPAN)){
+            nextVideo = videoMapper.findNextJapanByid(id,type);
+            if(nextVideo==null||nextVideo.getId()==null){
+                nextVideo = videoMapper.findFirstJapan(id,type);
+            }
+        }else{
+            nextVideo = videoMapper.findNextByid(id,video.getType(),type);
+            if(nextVideo==null||nextVideo.getId()==null){
+                nextVideo = videoMapper.findFirst(id,type);
+            }
+        }
+        return nextVideo;
+    }
+
+    @Override
+    public void moveFile(String source, String target) {
+
+        File sourceFile = new File(source);
+        if(!sourceFile.exists()||sourceFile.isFile()){
+            return;
+        }
+        for (File file : sourceFile.listFiles()) {
+            String fileName = file.getName().substring(0,file.getName().length()-4);
+            Video video = videoMapper.selectLikeName(fileName);
+            if(video!=null){
+                String videoUrl = video.getVideoUrl().substring(0,video.getVideoUrl().lastIndexOf("/")+1);
+                String filePath = target+videoUrl;
+                File videoFile = new File(filePath);
+                if(!videoFile.exists()){
+                    videoFile.mkdirs();
+                }
+                File targetFile = new File(filePath+file.getName());
+                if(targetFile.exists()){
+                    continue;
+                }
+                file.renameTo(targetFile);
+                video.setVideoUrl(videoUrl+file.getName());
+                update(video);
+            }
+        }
     }
 
     /**
@@ -171,7 +230,7 @@ public class VideoServiceImpl implements VideoService {
 
         List<Video> videos = videoMapper.selectPageList(actorName, videoName, language, type ,videoType);
         for (Video video : videos) {
-            video = getVideo(video, video.getId());
+            video = getVideo(video, video.getId(), null);
         }
         PageInfo<Video> page = new PageInfo<Video>(videos);
 
@@ -223,22 +282,17 @@ public class VideoServiceImpl implements VideoService {
      * 组装前端需求视频实体类，主要更新封面地址，视频地址，演员和分类
      * @param video 视频实体类
      * @param id    视频id
+     * @param type
      * @return 需求视频实体类
      */
     @Override
-    public Video getVideo(Video video, Integer id) {
+    public Video getVideo(Video video, Integer id, String type) {
 
         SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         Level oldlevel =  levelService.findByProductionIdAndUserId(id,user.getId(),CommonStatus.TYPE_TYPE_JAPAN);
         if(oldlevel!=null){
             video.setLevel(oldlevel.getLevel());
         }
-/*
-        List<String> addrlist = new ArrayList<String>();
-        addrlist.add("K:\\resources/");
-        addrlist.add("I:\\resource/");
-        addrlist.add("H:\\resources/");
-        addrlist.add("N:\\resources/");*/
 
         List<Actor> actors = actorService.findByVideoid(id);
         List<Type> types = typeService.findByVideoId(id);
@@ -254,10 +308,62 @@ public class VideoServiceImpl implements VideoService {
 
         video.setActors(actors);
         video.setTypes(types);
-        video.setCoverUrl(FILE_URL_PREFIX+video.getCoverUrl());
-        String address = null;
+        video.setCoverUrl(CommonStatus.COVER_URL_PREFIX+video.getCoverUrl());
+        if(type!=null&&type.equals("detail")){
+            List<String> piclist = new ArrayList<>();
+            if(CommonStatus.SYS_TYPE.equals("base")){
+                piclist= getAddress(video);
+            }else{
+                JsonData forObject = restTemplate.getForObject(CommonStatus.BASE_SYSTEM_URL + "/sysUtil/getVideoDetail?id=" + id, JsonData.class);
+                if(forObject==null||forObject.getCode()!=0){
+                    return video;
+                }
+                List<String> addrList = JSONObject.parseArray((String) forObject.getData()).toJavaObject(List.class);
+
+                for (String address : addrList) {
+                    System.out.println("oldAddr========"+address);
+                    System.out.println("BASE_SYS_INNER_URL========"+CommonStatus.BASE_SYS_INNER_URL);
+                    System.out.println("BASE_SYS_OUT_URL========"+CommonStatus.BASE_SYS_OUT_URL);
+                    String s = address.replace(CommonStatus.BASE_SYS_INNER_URL, CommonStatus.BASE_SYS_OUT_URL);
+                    piclist.add(s);
+                }
+            }
+            video.setAddress(piclist);
+        }
+        return video;
+    }
+
+    @Override
+    public List<String> getAddress(Video video) {
+        String address;
+        List<String> piclist = new ArrayList<>();
         if(System.getProperty("os.name").toLowerCase().contains("linux")){
-            address = CommonStatus.FILE_LINUX_ADDR + video.getVideoUrl();
+            for (String resourcesAddr : CommonStatus.resourcesAddrs) {
+                File root = new File(resourcesAddr + video.getVideoUrl());
+                if(!root.exists()){
+                    if(video.getVideoUrl().contains("多作者")){
+                        root = new File(resourcesAddr + video.getName()+ video.getVideoUrl().substring(video.getVideoUrl().lastIndexOf(".")));
+                        if(!root.exists()){
+                            continue;
+                        }
+                    }
+                    continue;
+                }
+
+                if(root.isFile()){
+                    String path = root.getPath();
+                    path = path.substring(5,path.length());
+                    piclist.add(CommonStatus.FILE_URL_PREFIX+path);
+                }else if(root.isDirectory()){
+                    File[] files = root.listFiles();
+
+                    for (File picfile : files) {
+                        String path = picfile.getPath();
+                        path = path.substring(5,path.length());
+                        piclist.add(CommonStatus.FILE_URL_PREFIX+path);
+                    }
+                }
+            }
         }else if(System.getProperty("os.name").toLowerCase().contains("windows")){
             for (String addr : CommonStatus.WINDOWS_ADDRS) {
                 address = addr + video.getVideoUrl();
@@ -266,21 +372,9 @@ public class VideoServiceImpl implements VideoService {
                 }
             }
         }
-        File root = new File(address);
-        List<String> piclist = new ArrayList<>();
-        if(root.isFile()){
-            piclist.add(FILE_URL_PREFIX+video.getVideoUrl());
-        }else if(root.isDirectory()){
-            File[] files = root.listFiles();
-
-            for (File picfile : files) {
-                piclist.add(FILE_URL_PREFIX+video.getVideoUrl()+File.separator+picfile.getName());
-            }
-        }
-
-        video.setAddress(piclist);
-        return video;
+        return piclist;
     }
+
 
     /**
      * 将本地文件信息保存到数据库
@@ -294,17 +388,274 @@ public class VideoServiceImpl implements VideoService {
         System.out.println(System.currentTimeMillis());
 
         if (filemap != null && filemap.size() > 0) {
-            for (UpdateFileName updateFileName : filemap) {
-                Video video = videoMapper.valudate(updateFileName.getSuggestname().substring(0,updateFileName.getSuggestname().indexOf(".")));
-                if(video!=null){
-                    continue;
+            if(type.equals("animate")){
+                saveAnimate(source,target,filemap);
+            }else if(type.equals("pornHub")){
+                savePornVideo(source,target,filemap);
+            }else if(type.equals("movie")){
+                saveMovie(source,target,filemap);
+            }else if(type.equals("korean")){
+                saveKorean(source,target,filemap);
+            }else if(type.equals("american")){
+                saveAmerican(source,target,filemap);
+            }else{
+                for (UpdateFileName updateFileName : filemap) {
+                    Video video = videoMapper.valudate(updateFileName.getSuggestname().substring(0,updateFileName.getSuggestname().indexOf(".")));
+                    if(video!=null){
+                        continue;
+                    }
+                    arrangeVideos.update(source,target,type,updateFileName);
                 }
-                /*UpdateFile updateFile = new UpdateFileImpl(source,target,type,updateFileName,webSiteToolsService,this,typeService,actorService, levelService);
-                updateFile.update();*/
-                arrangeVideos.update(source,target,type,updateFileName);
             }
         }
         actorService.updateLevel(null);
+    }
+
+
+    @Override
+    public void reName(String source, String target, List<UpdateFileName> filemap, String type){
+        System.out.println(System.currentTimeMillis());
+        for (UpdateFileName updateFileName : filemap) {
+            File oldFile = new File(source+File.separator+updateFileName.getFilename());
+            if(!oldFile.exists()){
+                continue;
+            }
+            File newFile = new File(target+File.separator+updateFileName.getSuggestname());
+            if(newFile.exists()){
+                continue;
+            }
+            oldFile.renameTo(newFile);
+        }
+
+    }
+
+    private void saveAnimate(String source, String target, List<UpdateFileName> filemap) {
+        Video video = new Video();
+        video.setType(CommonStatus.VIDEO_TYPE_ANIMATE);
+        video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+
+        for (UpdateFileName updateFileName : filemap) {
+            String filename = updateFileName.getFilename();
+            String suggestname = updateFileName.getSuggestname();
+            String oldAddr = source+File.separator+filename;
+            File oldFile = new File(oldAddr);
+            if(!oldFile.exists()||oldFile.isDirectory()){
+                continue;
+            }
+            video.setName(suggestname);
+            video.setCreatTime(new Date());
+
+            //文件名
+            String newName = getFileName();
+            String suffix = filename.substring(filename.lastIndexOf("."),filename.length());
+            String targetAddr = target+File.separator + "animate"+File.separator+newName+suffix;
+
+            String coverAddr = CommonStatus.FILE_COVER_PREFIX + File.separator +
+                    "animateCover" + File.separator + newName + ".jpg";
+            //VideoUtil.creatPic(oldAddr,coverAddr);
+
+            video.setVideoUrl(targetAddr);
+            video.setCoverUrl(File.separator +
+                    "animateCover" + File.separator + newName + ".jpg");
+            video.setVideoUrl(File.separator + "animate" + File.separator + newName+suffix);
+
+            JSONObject moveVideoJson = new JSONObject();
+            moveVideoJson.put("oldAddr",oldAddr);
+            moveVideoJson.put("coverAddr",coverAddr);
+            moveVideoJson.put("targetAddr",targetAddr);
+            msgProducer.sendToVideoCover(moveVideoJson);
+
+            //webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            add(video);
+
+        }
+
+    }
+
+    private void saveMovie(String source, String target, List<UpdateFileName> filemap) {
+        Video video = new Video();
+        video.setType(CommonStatus.VIDEO_TYPE_MOVIE);
+        video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+
+        for (UpdateFileName updateFileName : filemap) {
+            String filename = updateFileName.getFilename();
+            String suggestname = updateFileName.getSuggestname();
+            String oldAddr = source+File.separator+filename;
+            File oldFile = new File(oldAddr);
+            if(!oldFile.exists()||oldFile.isDirectory()){
+                continue;
+            }
+            video.setName(suggestname);
+            video.setCreatTime(new Date());
+
+            //文件名
+            String newName = getFileName();
+            String suffix = filename.substring(filename.lastIndexOf("."),filename.length());
+            String targetAddr = target+File.separator + "movie"+File.separator+newName+suffix;
+
+            String coverAddr = CommonStatus.FILE_COVER_PREFIX + File.separator +
+                    "movieCover" + File.separator + newName + ".jpg";
+            //VideoUtil.creatPic(oldAddr,coverAddr);
+
+            video.setVideoUrl(targetAddr);
+            video.setCoverUrl(File.separator +
+                    "movieCover" + File.separator + newName + ".jpg");
+            video.setVideoUrl(File.separator + "movie" + File.separator + newName+suffix);
+
+            JSONObject moveVideoJson = new JSONObject();
+            moveVideoJson.put("oldAddr",oldAddr);
+            moveVideoJson.put("coverAddr",coverAddr);
+            moveVideoJson.put("targetAddr",targetAddr);
+            msgProducer.sendToVideoCover(moveVideoJson);
+
+            //webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            add(video);
+
+        }
+
+    }
+
+    private void saveKorean(String source, String target, List<UpdateFileName> filemap) {
+        Video video = new Video();
+        video.setType(CommonStatus.VIDEO_TYPE_KOREAN);
+        video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+
+        for (UpdateFileName updateFileName : filemap) {
+            String filename = updateFileName.getFilename();
+            String suggestname = updateFileName.getSuggestname();
+            String oldAddr = source+File.separator+filename;
+            File oldFile = new File(oldAddr);
+            if(!oldFile.exists()||oldFile.isDirectory()){
+                continue;
+            }
+            video.setName(suggestname);
+            video.setCreatTime(new Date());
+
+            //文件名
+            String newName = getFileName();
+            String suffix = filename.substring(filename.lastIndexOf("."),filename.length());
+            String targetAddr = target+File.separator + "korean"+File.separator+newName+suffix;
+
+            String coverAddr = CommonStatus.FILE_COVER_PREFIX + File.separator +
+                    "koreanCover" + File.separator + newName + ".jpg";
+            //VideoUtil.creatPic(oldAddr,coverAddr);
+
+            video.setVideoUrl(targetAddr);
+            video.setCoverUrl(File.separator +
+                    "koreanCover" + File.separator + newName + ".jpg");
+            video.setVideoUrl(File.separator + "korean" + File.separator + newName+suffix);
+
+            JSONObject moveVideoJson = new JSONObject();
+            moveVideoJson.put("oldAddr",oldAddr);
+            moveVideoJson.put("coverAddr",coverAddr);
+            moveVideoJson.put("targetAddr",targetAddr);
+            msgProducer.sendToVideoCover(moveVideoJson);
+
+            //webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            add(video);
+
+        }
+
+    }
+
+    private void saveAmerican(String source, String target, List<UpdateFileName> filemap) {
+        Video video = new Video();
+        video.setType(CommonStatus.VIDEO_TYPE_AMERICAN);
+        video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+
+        for (UpdateFileName updateFileName : filemap) {
+            String filename = updateFileName.getFilename();
+            String suggestname = updateFileName.getSuggestname();
+            String oldAddr = source+File.separator+filename;
+            File oldFile = new File(oldAddr);
+            if(!oldFile.exists()||oldFile.isDirectory()){
+                continue;
+            }
+            video.setName(suggestname);
+            video.setCreatTime(new Date());
+
+            //文件名
+            String newName = getFileName();
+            String suffix = filename.substring(filename.lastIndexOf("."),filename.length());
+            String targetAddr = target+File.separator + "american"+File.separator+newName+suffix;
+
+            String coverAddr = CommonStatus.FILE_COVER_PREFIX + File.separator +
+                    "americanCover" + File.separator + newName + ".jpg";
+            //VideoUtil.creatPic(oldAddr,coverAddr);
+
+            video.setVideoUrl(targetAddr);
+            video.setCoverUrl(File.separator +
+                    "americanCover" + File.separator + newName + ".jpg");
+            video.setVideoUrl(File.separator + "american" + File.separator + newName+suffix);
+
+            JSONObject moveVideoJson = new JSONObject();
+            moveVideoJson.put("oldAddr",oldAddr);
+            moveVideoJson.put("coverAddr",coverAddr);
+            moveVideoJson.put("targetAddr",targetAddr);
+            msgProducer.sendToVideoCover(moveVideoJson);
+
+            //webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            add(video);
+
+        }
+
+    }
+
+    private void savePornVideo(String source, String target, List<UpdateFileName> filemap) {
+        Video video = new Video();
+        video.setType(CommonStatus.VIDEO_TYPE_PORN);
+        video.setExist(CommonStatus.VIDEO_EXIST_EXIST);
+
+        for (UpdateFileName updateFileName : filemap) {
+            String filename = updateFileName.getFilename();
+            String suggestname = updateFileName.getSuggestname();
+            String oldAddr = source+File.separator+filename;
+            File oldFile = new File(oldAddr);
+            if(!oldFile.exists()||oldFile.isDirectory()){
+                continue;
+            }
+            video.setName(suggestname);
+            video.setCreatTime(new Date());
+
+            //文件名
+            String newName = getFileName();
+            String suffix = filename.substring(filename.lastIndexOf("."),filename.length());
+            String targetAddr = target+File.separator + "pornHub"+File.separator+newName+suffix;
+
+            String picDir = CommonStatus.PORN_IMG_ADDR+filename.substring(filename.lastIndexOf("_")+1,filename.indexOf("."))+".png";
+            File picFile = new File(picDir);
+
+            String coverAddr = CommonStatus.FILE_COVER_PREFIX + File.separator +
+                    "pornHub" + File.separator + newName + ".jpg";
+            //VideoUtil.creatPic(oldAddr,coverAddr);
+
+            video.setVideoUrl(targetAddr);
+            video.setCoverUrl(File.separator +
+                    "pornHub" + File.separator + newName + ".jpg");
+            video.setVideoUrl(File.separator + "pornHub" + File.separator + newName+suffix);
+
+            JSONObject moveVideoJson = new JSONObject();
+            moveVideoJson.put("oldAddr",oldAddr);
+            moveVideoJson.put("coverAddr",coverAddr);
+            moveVideoJson.put("targetAddr",targetAddr);
+
+            if(picFile.exists()){
+                webSiteToolsService.moveFiles(picDir,coverAddr);
+                webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            }else{
+                msgProducer.sendToVideoCover(moveVideoJson);
+            }
+            //webSiteToolsService.moveFiles(oldAddr,targetAddr);
+            add(video);
+
+        }
+
+    }
+
+    private String getFileName(){
+        String prefix = String.valueOf(System.currentTimeMillis());
+        String s = RandomUtils.generateString(5);
+        return prefix+s;
     }
 
     /**
@@ -450,6 +801,54 @@ public class VideoServiceImpl implements VideoService {
         return filelist;
     }
 
+    /**
+     * 查询文件夹下所有视频，并提供建议文件名
+     * @param filepath  文件夹路径
+     * @return 建议文件名
+     */
+    @Override
+    public List<UpdateFileName> selectFileForAnimate(String filepath) {
+        File file = new File(filepath);
+        List<UpdateFileName> filelist = new ArrayList<UpdateFileName>();
+        List<Util> utils = utilService.findByType(2);
+        if(file.exists()&&file.isDirectory()){
+            File[] listFiles = file.listFiles();
+            for (File listFile : listFiles) {
+                String filename = listFile.getName();
+
+                UpdateFileName updateFileName = new UpdateFileName();
+                updateFileName.setFilename(filename);
+                updateFileName.setSuggestname(filename);
+                filelist.add(updateFileName);
+            }
+        }
+        return filelist;
+    }
+
+    /**
+     * 查询文件夹下所有视频，并提供建议文件名
+     * @param filepath  文件夹路径
+     * @return 建议文件名
+     */
+    @Override
+    public List<UpdateFileName> selectFileForPornHub(String filepath) {
+        File file = new File(filepath);
+        List<UpdateFileName> filelist = new ArrayList<UpdateFileName>();
+        List<Util> utils = utilService.findByType(2);
+        if(file.exists()&&file.isDirectory()){
+            File[] listFiles = file.listFiles();
+            for (File listFile : listFiles) {
+                String filename = listFile.getName();
+
+                UpdateFileName updateFileName = new UpdateFileName();
+                updateFileName.setFilename(filename);
+                updateFileName.setSuggestname(filename);
+                filelist.add(updateFileName);
+            }
+        }
+        return filelist;
+    }
+
     @Override
     public void saveViewHistory(Integer type, Integer id, Integer startData, Integer watchTime) {
 
@@ -459,7 +858,7 @@ public class VideoServiceImpl implements VideoService {
     public JsonData getWatchList(List<Integer> idList) {
         List<Video> videoList = videoMapper.selectByIdList(idList);
         for (Video video : videoList) {
-            video = getVideo(video, video.getId());
+            video = getVideo(video, video.getId(), null);
         }
         return JsonData.buildSuccess(videoList);
     }
@@ -468,7 +867,7 @@ public class VideoServiceImpl implements VideoService {
     public JsonData suggestVideo(String id) {
         List<Video> videoList = videoMapper.getSuggestVideo(id);
         for (Video video : videoList) {
-            video = getVideo(video, video.getId());
+            video = getVideo(video, video.getId(), null);
         }
         return JsonData.buildSuccess(videoList);
     }

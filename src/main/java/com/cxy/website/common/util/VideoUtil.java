@@ -1,9 +1,10 @@
 package com.cxy.website.common.util;
 
-import org.bytedeco.javacv.*;
+import com.cxy.website.common.CommonStatus;
+/*import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.springframework.util.ResourceUtils;
+import org.springframework.util.ResourceUtils;*/
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -11,6 +12,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @program: website
@@ -26,7 +29,7 @@ public class VideoUtil {
      * @return 时长（s）
      */
     private static long getVideoDuration(File video) {
-        long duration = 0L;
+        /*long duration = 0L;
         FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
         try {
             ff.start();
@@ -35,7 +38,8 @@ public class VideoUtil {
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
-        return duration;
+        return duration;*/
+        return 0l;
     }
 
     /**
@@ -45,13 +49,20 @@ public class VideoUtil {
      * @param picPath 截图存放路径
      */
     private static void getVideoPic(File video, String picPath) {
-        FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
+        /*FFmpegFrameGrabber ff = new FFmpegFrameGrabber(video);
         try {
             ff.start();
             // 截取中间帧图片(具体依实际情况而定)
             int i = 0;
             int length = ff.getLengthInFrames();
+            System.out.println("时长 " + length / ff.getFrameRate() / 60);
+            Double prefer = 20*ff.getFrameRate()*60;
+
             int middleFrame = length / 2;
+
+            if(middleFrame>prefer){
+                middleFrame = prefer.intValue();
+            }
             Frame frame = null;
             while (i < length) {
                 frame = ff.grabFrame();
@@ -75,7 +86,7 @@ public class VideoUtil {
             ff.stop();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /*public static void main(String[] args) {
@@ -98,9 +109,36 @@ public class VideoUtil {
     public static String creatPic(String videoPath,String picPath){
         File video = new File(videoPath);
         if(video.exists()&&video.isFile()){
-            getVideoPic(video, picPath);
+            try {
+                FFMPEGUtil.getVideoPic(videoPath,picPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return picPath;
+    }
+
+    public static String getVideoUrl(String addr){
+        List<String> piclist = new ArrayList<>();
+        for (String resourcesAddr : CommonStatus.resourcesAddrs) {
+            File file = new File(resourcesAddr+addr);
+            if(!file.exists()){
+
+                continue;
+            }
+            if(file.isFile()){
+                String url = file.getPath().replace("/mnt","");
+                piclist.add(CommonStatus.FILE_URL_PREFIX+url);
+            }else if(file.isDirectory()){
+                File[] files = file.listFiles();
+
+                for (File picfile : files) {
+                    String url = picfile.getPath().replace("/mnt","");
+                    piclist.add(CommonStatus.FILE_URL_PREFIX+url);
+                }
+            }
+        }
+        return null;
     }
 
 }

@@ -101,6 +101,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/get", "anon");
 
         filterChainDefinitionMap.put("/rabbitMq/**", "anon");
+        filterChainDefinitionMap.put("/sysUtil/**", "anon");
 
         filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/phone", "anon");
@@ -110,6 +111,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/img/**", "anon");
         filterChainDefinitionMap.put("/vendor/**", "anon");
         filterChainDefinitionMap.put("/video/saveinfo", "anon");
+        filterChainDefinitionMap.put("/video/getNext", "anon");
         filterChainDefinitionMap.put("/doctorManage/**","anon");//放行医生登录的相关请求
 
 

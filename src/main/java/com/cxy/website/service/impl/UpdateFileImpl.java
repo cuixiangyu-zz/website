@@ -65,7 +65,7 @@ public class UpdateFileImpl implements UpdateFile {
         String filename = suggestname.substring(0, suggestname.indexOf("."));
 
         //从网页获取视频基本信息
-        Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename);
+        Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename, null);
 
         if (videoinfo == null || videoinfo.get("title") == null || videoinfo.get("title") == "") {
             return;
@@ -128,7 +128,7 @@ public class UpdateFileImpl implements UpdateFile {
                     artists.get(0) + File.separator + suggestname);
         } else {
             String targetPath = target + File.separator + type + File.separator +
-                    "多作者" + File.separator + file.getName();
+                    "多作者" + File.separator + suggestname;
             webSiteToolsService.moveFiles(fileaddress, targetPath);
             video.setVideoUrl(File.separator + type + File.separator +
                     "多作者" + File.separator + suggestname);

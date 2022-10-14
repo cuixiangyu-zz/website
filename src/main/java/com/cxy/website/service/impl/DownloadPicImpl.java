@@ -54,9 +54,9 @@ public class DownloadPicImpl implements DownloadPic {
                 sf.mkdirs();
             }
             String filename = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());//获取服务器上图片的名称
-            String index = filename.substring(filename.indexOf("."), filename.length());
+            String index = filename.substring(filename.lastIndexOf("."), filename.length());
 
-            OutputStream os = new FileOutputStream(sf.getPath() + "\\" + fileName + index);
+            OutputStream os = new FileOutputStream(sf.getPath() + "/" + fileName + index);
             virtualPath =  fileName + index;//存入数据库的虚拟路径
             // 开始读取
             while ((len = input.read(bs)) != -1) {

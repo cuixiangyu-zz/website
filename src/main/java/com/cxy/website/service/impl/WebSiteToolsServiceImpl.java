@@ -1,10 +1,11 @@
 package com.cxy.website.service.impl;
 
 import com.cxy.website.common.CommonStatus;
+import com.cxy.website.common.util.StringUtil;
 import com.cxy.website.service.DownloadPic;
 import com.cxy.website.service.WebSiteToolsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -119,10 +120,11 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
      * 根据影片id查找影片基本信息
      *
      * @param id 影片id
+     * @param type
      * @return 影片基本信息
      */
     @Override
-    public Map<String, Object> getvideoinfo(String id) {
+    public Map<String, Object> getvideoinfo(String id, String type) {
         Map<String, Object> coversrc = new HashMap<String, Object>();
         List<String> category = new ArrayList<>();
         List<String> artists = new ArrayList<>();
@@ -130,12 +132,19 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         String picurl = "";
         try {
             //建立连接
-            URL url = new URL(CommonStatus.JAPAN_URL + id);
+            URL url;
+            if(StringUtils.isEmpty(type)||type.contains("japan")){
+                url = new URL(CommonStatus.JAPAN_URL + id);
+            }else{
+                url = new URL(CommonStatus.AMERICAN_URL + id);
+            }
+
             // URL url = new URL("https://www.seedmm.in/" + id);
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
             httpUrlConn.setDoInput(true);
             httpUrlConn.setRequestMethod("GET");
-            httpUrlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            httpUrlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36");
+            httpUrlConn.setRequestProperty("cookie",CommonStatus.COOKIE);
             //获取输入流
             InputStream input = httpUrlConn.getInputStream();
             //将字节输入流转换为字符输入流
@@ -198,7 +207,11 @@ public class WebSiteToolsServiceImpl implements WebSiteToolsService {
         coversrc.put("category", category);
         coversrc.put("artists", artists);
         coversrc.put("title", title);
-        coversrc.put("picurl", "https://www.busjav.cam"+picurl);
+        if(picurl!=null&&!picurl.contains("https://www.")){
+            coversrc.put("picurl", CommonStatus.COVER_URL_PREFIX_NET+picurl);
+        }else{
+            coversrc.put("picurl", picurl);
+        }
         return coversrc;
     }
 

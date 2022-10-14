@@ -63,7 +63,7 @@ public interface VideoService {
 
     JsonData findPageList(Integer pageNum, Integer pageSize, String actorName, String pictureName, String language, List<List<Object>> types, Integer videoType);
 
-    Video getVideo(Video video, Integer id);
+    Video getVideo(Video video, Integer id, String type);
 
     /**
      * 将本地文件信息保存到数据库
@@ -89,9 +89,23 @@ public interface VideoService {
 
     public List<UpdateFileName> selectFileForAmerican(String filepath);
 
+    public List<UpdateFileName> selectFileForAnimate(String filepath);
+
     void saveViewHistory(Integer type, Integer id, Integer startData, Integer watchTime);
 
     JsonData getWatchList(List<Integer> idList);
 
     JsonData suggestVideo(String id);
+
+    List<UpdateFileName> selectFileForPornHub(String source);
+
+    public List<String> getAddress(Video video);
+
+    List<Video> checkExist(String name);
+
+    Video findNextByid(Integer id,String type);
+
+    void moveFile(String source, String target);
+
+    void reName(String source, String target, List<UpdateFileName> filemap, String type);
 }

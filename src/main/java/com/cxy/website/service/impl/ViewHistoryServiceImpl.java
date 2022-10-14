@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -73,14 +72,14 @@ public class ViewHistoryServiceImpl implements ViewHistoryService {
                 if(picture==null){
                     continue;
                 }
-                picture = pictureService.getPicture(picture, picture.getId());
+                picture = pictureService.getPicture(picture, picture.getId(), null);
                 viewHistory.setPicture(picture);
             }else{
                 Video video = videoService.findByid(viewHistory.getVideoId());
                 if(video==null){
                     continue;
                 }
-                video = videoService.getVideo(video, video.getId());
+                video = videoService.getVideo(video, video.getId(), null);
                 viewHistory.setVideo(video);
             }
         }

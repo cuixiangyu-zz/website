@@ -3,6 +3,7 @@ package com.cxy.website.service.rabbitMqService;
 import com.alibaba.fastjson.JSONObject;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.config.rabbitMq.RabbitMqConfig;
+import com.cxy.website.common.util.VideoUtil;
 import com.cxy.website.model.Actor;
 import com.cxy.website.model.Level;
 import com.cxy.website.model.UpdateFileName;
@@ -67,6 +68,7 @@ public class MsgConsumer {
 
         JSONObject videoNameQueue = (JSONObject) JSONObject.parse(msg);
         String source = videoNameQueue.getString("source");
+        String type = videoNameQueue.getString("type");
         JSONObject updateFileNameJson = videoNameQueue.getJSONObject("updateFileName");
         UpdateFileName updateFileName = updateFileNameJson.toJavaObject(UpdateFileName.class);
         String fileaddress = source + File.separator + updateFileName.getFilename();
@@ -77,7 +79,7 @@ public class MsgConsumer {
         String filename = suggestname.substring(0, suggestname.indexOf("."));
 
         //从网页获取视频基本信息
-        Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename);
+        Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(filename, type);
 
         if (videoinfo == null || videoinfo.get("title") == null || videoinfo.get("title") == "") {
             return;
@@ -85,6 +87,41 @@ public class MsgConsumer {
 
         videoNameQueue.put("videoinfo",videoinfo);
         msgProducer.sendToArtistName(videoNameQueue);
+    }
+
+    /**
+     * 根据名字从网站爬取作品名，演员等信息队列
+     * @param massage   名字
+     */
+    @RabbitListener(
+            bindings =
+                    {
+                            @QueueBinding(value = @Queue(value = RabbitMqConfig.REFRESH_COVER_QUEUE_NAME, durable = "true"),
+                                    exchange = @Exchange(value = RabbitMqConfig.DIRECT_EXCHANGE),
+                                    key = RabbitMqConfig.REFRESH_COVER_ROUTING_KEY)
+                    })
+    @RabbitHandler
+    public void processRefreshCoverMsg(Message massage) {
+        String msg = new String(massage.getBody(), StandardCharsets.UTF_8);
+        System.out.println("重新获取视频封面-----------------------"+msg);
+
+        JSONObject videoNameQueue = (JSONObject) JSONObject.parse(msg);
+        String videoName = videoNameQueue.getString("videoName");
+        String localAddress = videoNameQueue.getString("localAddress");
+
+        //从网页获取视频基本信息
+        Map<String, Object> videoinfo = webSiteToolsService.getvideoinfo(videoName, "japan");
+
+        if (videoinfo == null || videoinfo.get("title") == null || videoinfo.get("title") == "") {
+            return;
+        }
+
+        videoNameQueue.put("videoinfo",videoinfo);
+        JSONObject download = new JSONObject();
+        download.put("picUrl",videoinfo.get("picurl").toString());
+        download.put("localAddress",localAddress);
+        download.put("filename",videoName);
+        msgProducer.sendToCoverUrl(download);
     }
 
     /**
@@ -256,5 +293,34 @@ public class MsgConsumer {
             return;
         }
         webSiteToolsService.downloadPics(picUrl, localAddress, filename);
+    }
+
+
+    /**
+     * 根据视频生成封面,并将文件移动到指定文件加
+     * @param massage   封面url
+     */
+    @RabbitListener(
+            bindings =
+                    {
+                            @QueueBinding(value = @Queue(value = RabbitMqConfig.CREAT_VIDEO_COVER_QUEUE_NAME, durable = "true"),
+                                    exchange = @Exchange(value = RabbitMqConfig.DIRECT_EXCHANGE),
+                                    key = RabbitMqConfig.CREAT_VIDEO_COVER_ROUTING_KEY)
+                    })
+    @RabbitHandler
+    public void processVideoCoverMsg(Message massage) {
+        String msg = new String(massage.getBody(), StandardCharsets.UTF_8);
+        System.out.println("生成视频封面-----------------------"+msg);
+
+        JSONObject picUrlJson = JSONObject.parseObject(msg);
+
+        String oldAddr = picUrlJson.getString("oldAddr");
+        String coverAddr = picUrlJson.getString("coverAddr");
+        String targetAddr = picUrlJson.getString("targetAddr");
+        if(StringUtils.isEmpty(oldAddr)){
+            return;
+        }
+        VideoUtil.creatPic(oldAddr,coverAddr);
+        webSiteToolsService.moveFiles(oldAddr,targetAddr);
     }
 }

@@ -1,6 +1,10 @@
 package com.cxy.website.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.cxy.website.common.CommonStatus;
+import com.cxy.website.common.util.RandomUtils;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.dao.PictureMapper;
 import com.cxy.website.dao.PictureTypeMapper;
@@ -9,20 +13,13 @@ import com.cxy.website.model.sys.SysUser;
 import com.cxy.website.service.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.io.FileUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -52,8 +49,8 @@ public class PictureServiceImpl implements PictureService {
     @Autowired
     UserFavoriteService userFavoriteService;
 
-    @Value("${file.url.prefix}")
-    private String FILE_URL_PREFIX ;
+    @Autowired
+    RestTemplate restTemplate;
 
     private static final Pattern COMIC_NAME = Pattern.compile("\\][^\\[\\]]+(\\[)?");
 
@@ -191,8 +188,24 @@ public class PictureServiceImpl implements PictureService {
         }
 
         List<Picture> pictures = pictureMapper.selectPageList(actorName, pictureName, language, type);
-        for (Picture picture : pictures) {
-            picture = getPicture(picture, picture.getId());
+        if(CommonStatus.SYS_TYPE.equals("remote")){
+            JSONArray idList = new JSONArray();
+            for (Picture picture : pictures) {
+                idList.add(picture.getId());
+            }
+            JsonData forObject = restTemplate.postForObject(CommonStatus.BASE_SYSTEM_URL + "/sysUtil/getPictureCoverList" , idList, JsonData.class);
+            if (forObject != null && forObject.getCode() == 0) {
+                JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(forObject.getData()));
+                for (Picture picture : pictures) {
+                    String URL = jsonObject.getString(picture.getId().toString());
+                    String s = URL.replace(CommonStatus.BASE_SYS_INNER_URL, CommonStatus.BASE_SYS_OUT_URL);
+                    picture.setCoverUrl(s);
+                }
+            }
+        }else{
+            for (Picture picture : pictures) {
+                picture = getPicture(picture, picture.getId(), null);
+            }
         }
         PageInfo<Picture> page = new PageInfo<Picture>(pictures);
         List<Type> alltypes = typeService.findByType(CommonStatus.TYPE_TYPE_PICTURE);
@@ -235,44 +248,94 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    public Picture getPicture(Picture picture, Integer id) {
+    public Picture getPicture(Picture picture, Integer id, String type) {
 
         SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         List<Actor> actors = actorService.findByPictureid(id);
         List<Type> types = typeService.findByPictureid(id);
         picture.setActors(actors);
         picture.setTypes(types);
-        picture.setCoverUrl(FILE_URL_PREFIX + picture.getCoverUrl());
 
         Level level = levelService.findByProductionIdAndUserId(picture.getId(), user.getId(), CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE);
         if (level != null) {
             picture.setLevel(level.getLevel());
         }
 
-        UserFavorite userFavorite = userFavoriteService.findByUserIdAndVideoId(user.getId(),CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE, id);
+        UserFavorite userFavorite = userFavoriteService.findByUserIdAndVideoId(user.getId(), CommonStatus.FAVORITE_HISTORY_TYPE_PICTURE, id);
         if (userFavorite != null) {
             picture.setUserFavorite(userFavorite);
         }
-        String address = null;
-        if(System.getProperty("os.name").toLowerCase().contains("linux")){
-            address = CommonStatus.FILE_LINUX_ADDR + picture.getPictureUrl();
-        }else if(System.getProperty("os.name").toLowerCase().contains("windows")){
-            for (String addr : CommonStatus.WINDOWS_ADDRS) {
-                address = addr + picture.getPictureUrl();
-                if (new File(address).exists()) {
-                    break;
+
+        List<String> piclist = new ArrayList<>();
+        if (CommonStatus.SYS_TYPE.equals("base")) {
+            piclist = getAddress(picture);
+
+        } else {
+            JsonData forObject = restTemplate.getForObject(CommonStatus.BASE_SYSTEM_URL + "/sysUtil/getPictureDetail?id=" + id, JsonData.class);
+            if (forObject == null || forObject.getCode() != 0) {
+                return picture;
+            }
+            List<String> addrList = JSONObject.parseArray((String) forObject.getData()).toJavaObject(List.class);
+
+            for (int i=0;i< addrList.size();i++) {
+                String address = addrList.get(i);
+                String s = address.replace(CommonStatus.BASE_SYS_INNER_URL, CommonStatus.BASE_SYS_OUT_URL);
+                piclist.add(s);
+                if(i==0){
+                    picture.setCoverUrl(s);
                 }
             }
         }
-
-
-        File root = new File(address);
-        File[] files = root.listFiles();
-        List<String> piclist = new ArrayList<>();
-        for (File picfile : files) {
-            piclist.add(FILE_URL_PREFIX + picture.getPictureUrl() + File.separator + picfile.getName());
-        }
         picture.setAddress(piclist);
+        return picture;
+    }
+
+    public List<String> getAddress(Picture picture) {
+        List<String> piclist = new ArrayList<>();
+        if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+            for (String resourcesAddr : CommonStatus.resourcesAddrs) {
+                File root = new File(resourcesAddr + picture.getPictureUrl());
+                if (!root.exists()) {
+                    continue;
+                }
+                String cover = resourcesAddr.substring(5);
+                picture.setCoverUrl(CommonStatus.FILE_URL_PREFIX + cover + picture.getCoverUrl());
+                if (root.isDirectory()) {
+                    File[] files = root.listFiles();
+
+                    for (File picfile : files) {
+                        String path = picfile.getPath();
+                        path = path.substring(5, path.length());
+                        piclist.add(CommonStatus.FILE_URL_PREFIX + path);
+                    }
+                }
+            }
+        }
+        return piclist;
+    }
+
+    @Override
+    public String getCover(Picture picture) {
+        String coverUrl = "";
+        if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+            for (String resourcesAddr : CommonStatus.resourcesAddrs) {
+                File root = new File(resourcesAddr + picture.getPictureUrl());
+                if (!root.exists()) {
+                    continue;
+                }
+                String cover = resourcesAddr.substring(5);
+                coverUrl = CommonStatus.FILE_URL_PREFIX + cover + picture.getCoverUrl();
+            }
+        }
+        return coverUrl;
+    }
+
+    @Override
+    public Picture findNextById(Integer id, String type) {
+        Picture picture = pictureMapper.findNextById(id,type);
+        if(picture==null||picture.getId()==null){
+            picture = pictureMapper.findFirst(type);
+        }
         return picture;
     }
 
@@ -290,7 +353,7 @@ public class PictureServiceImpl implements PictureService {
         for (File listFile : file.listFiles()) {
             UpdateFileName updateFileName = new UpdateFileName();
             String picName = listFile.getName();
-            if(picName.indexOf("[Digital]")>0){
+            /*if(picName.indexOf("[Digital]")>0){
                 picName = picName.replace("[Digital]","");
             }
             if(picName.indexOf("[")>1){
@@ -312,9 +375,9 @@ public class PictureServiceImpl implements PictureService {
                 if (currentName.length() >= 2 && currentName.length() > newName.length()) {
                     newName = currentName;
                 }
-            }
+            }*/
             updateFileName.setFilename(picName);
-            updateFileName.setSuggestname(newName);
+            updateFileName.setSuggestname(picName);
             picList.add(updateFileName);
         }
         return JsonData.buildSuccess(picList);
@@ -332,13 +395,15 @@ public class PictureServiceImpl implements PictureService {
     public void updatePicsFromLocal(String source, String target, List<UpdateFileName> fileMaps, String type) {
         for (UpdateFileName fileMap : fileMaps) {
             String suggestname = fileMap.getSuggestname();
-            if (suggestname.startsWith(" ")) {
-                suggestname = suggestname.substring(1, suggestname.length());
+
+            Picture picture1 = this.findByName(fileMap.getFilename());
+            if (picture1 != null && picture1.getExist().equals(CommonStatus.PICTURE_EXIST_EXIST)) {
+                continue;
             }
-            suggestname = suggestname.replaceAll(" ", "_");
-            suggestname = suggestname.replaceAll(";", "_");
+            String newName = getFileName();
+
             String oldAddress = source + File.separator + fileMap.getFilename();
-            String newAddress = target + File.separator + suggestname;
+            String newAddress = target + "/comic/" + newName;
             File file = new File(oldAddress);
             if (!file.exists() || file.listFiles().length <= 0) {
                 continue;
@@ -348,8 +413,9 @@ public class PictureServiceImpl implements PictureService {
             Picture picture = new Picture();
             picture.setName(fileMap.getFilename());
             picture.setExist(CommonStatus.PICTURE_EXIST_EXIST);
-            picture.setPictureUrl("/comic/" + suggestname);
+            picture.setPictureUrl("/comic/" + newName);
             picture.setCoverUrl("/comic/" + coverName);
+            picture.setCreatTime(new Date());
             if (fileMap.getFilename().indexOf("Chinese") > 0) {
                 picture.setLanguage("Chinese");
             }
@@ -360,6 +426,12 @@ public class PictureServiceImpl implements PictureService {
             }
             this.add(picture);
         }
+    }
+
+    private String getFileName() {
+        String prefix = String.valueOf(System.currentTimeMillis());
+        String s = RandomUtils.generateString(5);
+        return prefix + s;
     }
 
     /**
@@ -375,9 +447,15 @@ public class PictureServiceImpl implements PictureService {
             newFile.mkdirs();
         }
         for (File file : oldFile.listFiles()) {
-            copyFile(file.getPath(), newAddress + File.separator + file.getName());
-            file.delete();
+            String fileName = file.getName();
+            if (file.getName().contains(".fdmdownload")) {
+                fileName = fileName.substring(0, fileName.length() - 12);
+            }
+            file.renameTo(new File(newAddress + File.separator + fileName));
+            //copyFile(file.getPath(), newAddress + File.separator + fileName);
+            //file.delete();
         }
+        oldFile.delete();
         return newFile.getName() + File.separator + newFile.listFiles()[0].getName();
     }
 

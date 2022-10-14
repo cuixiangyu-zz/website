@@ -1,21 +1,23 @@
 package com.cxy.website.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.cxy.website.common.CommonStatus;
 import com.cxy.website.common.util.web.JsonData;
 import com.cxy.website.model.*;
 import com.cxy.website.model.sys.SysUser;
 import com.cxy.website.service.ActorService;
 import com.cxy.website.service.TypeService;
-import com.cxy.website.service.UserFavoriteService;
 import com.cxy.website.service.VideoService;
 import com.github.pagehelper.PageInfo;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +34,9 @@ public class VideoController {
 
     @Autowired
     TypeService typeService;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     @Autowired
     ActorService actorService;
@@ -93,11 +98,28 @@ public class VideoController {
     @RequestMapping(value = "/getDetile",method = RequestMethod.GET)
     @ResponseBody
     public JsonData getDetile(@RequestParam Integer id){
-        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
-        Video videos = videoService.findByid(id);
-        videos = videoService.getVideo(videos, id);
-        return JsonData.buildSuccess(videos);
+            SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
+            Video videos = videoService.findByid(id);
+            videos = videoService.getVideo(videos, id, "detail");
+            return JsonData.buildSuccess(videos);
+
     }
+
+    /**
+     * 根据影片id获取下一个
+     * @param id    影片id
+     * @return  影片详细信息
+     */
+    @RequestMapping(value = "/getNext",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData getNext(@RequestParam Integer id,@RequestParam String type){
+        SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
+        Video videos = videoService.findNextByid(id,type);
+        videos = videoService.getVideo(videos, id, "detail");
+        return JsonData.buildSuccess(videos);
+
+    }
+
 
     /**
      * 根据条件查询分页信息
@@ -147,6 +169,42 @@ public class VideoController {
         return JsonData.buildSuccess(updateFileNames);
     }
 
+    /**
+     * 查找目录下所有文件，并提供建议文件名
+     * @param source    文件夹路径
+     * @return  文件名list
+     */
+    @RequestMapping(value = "/selectFileForAnimate" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData selectFileForAnimate(@RequestParam String source){
+        /*File file = new File(source);
+        for (File listFile : file.listFiles()) {
+            for (File file1 : listFile.listFiles()) {
+                file1.renameTo(new File("L:\\resources"+File.separator+file1.getName()));
+            }
+        }*/
+        List<UpdateFileName> updateFileNames = videoService.selectFileForAnimate(source);
+        return JsonData.buildSuccess(updateFileNames);
+    }
+
+    /**
+     * 查找目录下所有文件，并提供建议文件名
+     * @param source    文件夹路径
+     * @return  文件名list
+     */
+    @RequestMapping(value = "/selectFileForPornHub" , method = RequestMethod.GET)
+    @ResponseBody
+    public JsonData selectFileForPornHub(@RequestParam String source){
+        List<UpdateFileName> updateFileNames = videoService.selectFileForPornHub(source);
+        return JsonData.buildSuccess(updateFileNames);
+    }
+
+    @GetMapping(value = "/moveFile")
+    @ResponseBody
+    public JsonData moveFile(@RequestParam String source,@RequestParam String target){
+        videoService.moveFile(source,target);
+        return JsonData.buildSuccess();
+    }
 
     /**
      * 将页面信息保存到数据库
@@ -177,6 +235,15 @@ public class VideoController {
     public JsonData updatefile(@RequestBody Updatefile updatefile){
 
         videoService.updateVideoFromLocal(updatefile.getSource(),updatefile.getTarget()
+                ,updatefile.getFilemap(),updatefile.getType());
+        return JsonData.buildSuccess();
+    }
+
+    @RequestMapping(value = "/reName" , method = RequestMethod.POST)
+    @ResponseBody
+    public JsonData reName(@RequestBody Updatefile updatefile){
+
+        videoService.reName(updatefile.getSource(),updatefile.getTarget()
                 ,updatefile.getFilemap(),updatefile.getType());
         return JsonData.buildSuccess();
     }

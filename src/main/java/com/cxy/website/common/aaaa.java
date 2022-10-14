@@ -10,10 +10,24 @@ import java.io.File;
  **/
 public class aaaa {
     public static void main(String[] args){
-        String aab = "/mnt/1t-3/resources\\japanvideo\\黒川サリナ\\ABP-739.mp4";
-        /*aab = aab.replaceAll("\\\\","|");
-        aab = aab.replaceAll("\\|","/");*/
-        aab = aab.replaceAll("\\\\","/");
-        System.out.println(aab);
+        String oldPath = "M:\\迅雷下载";
+        File oldFile = new File(oldPath);
+        for (File file : oldFile.listFiles()) {
+            if(!file.isDirectory()){
+                continue;
+            }
+            /*long size = file.length() / 1024 / 1024 / 1024;
+            if(size<1){
+                continue;
+            }*/
+
+            for (File listFile : file.listFiles()) {
+                String name = listFile.getName();
+                long fileSize = listFile.length() / 1024 / 1024 / 1024;
+                if((name.endsWith(".mp4")||name.endsWith(".avi")||name.endsWith(".mpg"))&&fileSize>1){
+                    listFile.renameTo(new File("M:\\新建文件夹 (2)/"+name));
+                }
+            }
+        }
     }
 }

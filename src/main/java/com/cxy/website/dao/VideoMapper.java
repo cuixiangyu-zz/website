@@ -60,6 +60,27 @@ public interface VideoMapper {
     @Cacheable(cacheNames = "selectByPrimaryKey")
     Video selectByPrimaryKey(Integer id);
 
+    @Select({
+            "select",
+            "id, name,  video_url, cover_url, creat_time, creater, type, exist, remark",
+            "from tb_video",
+            "where name like '%${name}%'"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    @Cacheable(cacheNames = "selectLikeName")
+    Video selectLikeName(@Param("name") String name);
+
     @UpdateProvider(type = VideoSqlProvider.class, method = "updateByPrimaryKeySelective")
     @CachePut
     int updateByPrimaryKeySelective(Video record);
@@ -86,7 +107,7 @@ public interface VideoMapper {
             "from tb_video vid",
             "left join (SELECT AVG(`level`) as `level`,production_id FROM `tb_level`  GROUP BY production_id) lv",
             " on vid.id = lv.production_id ",
-            "where name = #{name,jdbcType=VARCHAR}"
+            "where name = #{name,jdbcType=VARCHAR} order by vid.creat_time desc"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
@@ -112,7 +133,7 @@ public interface VideoMapper {
             "left join tb_actor act on vidact.actor_id = act.id",
             "left join (SELECT AVG(`level`) as `level`,production_id FROM `tb_level`  GROUP BY production_id) lv",
             " on vid.id = lv.production_id ",
-            "where act.id = #{id,jdbcType=INTEGER}"
+            "where act.id = #{id,jdbcType=INTEGER} order by vid.creat_time desc"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
@@ -136,7 +157,7 @@ public interface VideoMapper {
             "from tb_video vid",
             "left join (SELECT AVG(`level`) as `level`,production_id FROM `tb_level`  GROUP BY production_id) lv",
             " on vid.id = lv.production_id ",
-            "where type = #{type,jdbcType=VARCHAR}"
+            "where type = #{type,jdbcType=VARCHAR} order by vid.creat_time desc"
     })
     @Results({
             @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
@@ -183,7 +204,7 @@ public interface VideoMapper {
             "<if test='videoName !=null'>",
             "and vio.name like '%${videoName}%'",
             "</if>",
-            "GROUP BY vio.id",
+            "GROUP BY vio.id order by vio.creat_time desc",
             "</script>"
     })
     @Results({
@@ -286,4 +307,136 @@ public interface VideoMapper {
             @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
     })
     List<Video> getSuggestVideo(String id);
+
+    @Select({
+            "select cover_url from tb_video where type = 1"
+    })
+    List<String> selectCover();
+
+    @Select({
+            "select * from tb_video where name like '%${name}%' and type = 1"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    List<Video> checkExist(@Param("name")String name);
+
+
+    @Select({
+            "<script>",
+            "select * from tb_video WHERE   type = #{type} and exist = 1 ",
+            "<if test='next ==\"next\"'>",
+            " <![CDATA[and id > #{id} ORDER BY id LIMIT 0,1]]>",
+            "</if>",
+            "<if test='next ==\"pre\"'>",
+            " <![CDATA[and id < #{id} ORDER BY id desc LIMIT 0,1]]>",
+            "</if>",
+            "</script>"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    Video findNextByid(@Param("id")Integer id, @Param("type")Integer type, @Param("next")String next);
+
+    @Select({
+            "<script>",
+            "select * from tb_video WHERE   type = #{type} and exist = 1 ",
+            "<if test='next ==\"next\"'>",
+            "  ORDER BY id ",
+            "</if>",
+            "<if test='next ==\"pre\"'>",
+            "  ORDER BY id desc",
+            "</if>",
+            " LIMIT 0,1; ",
+            "</script>"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    Video findFirst(@Param("type")Integer type, @Param("next")String next);
+
+    @Select({
+            "<script>",
+            "SELECT vio.* FROM tb_video  vio " ,
+            "left join tb_video_actor act on vio.id = act.video_id " ,
+            "where type = 1 and exist = 1 " ,
+            "and act.actor_id in (select actor_id from tb_video_actor where video_id = #{id} ) ",
+            "<if test='type ==\"next\"'>",
+            " <![CDATA[and vio.id > #{id} ORDER BY vio.id LIMIT 0,1 ]]>",
+            "</if>",
+            "<if test='type ==\"pre\"'>",
+            " <![CDATA[and vio.id < #{id} ORDER BY vio.id desc LIMIT 0,1 ]]>",
+            "</if>",
+            "</script>"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    Video findNextJapanByid(@Param("id")Integer id, @Param("type")String type);
+
+    @Select({
+            "<script>",
+            " SELECT vio.* FROM tb_video  vio " ,
+            "  join tb_video_actor act on vio.id = act.video_id " ,
+            " where type = 1 and exist = 1 " ,
+
+            " and act.actor_id in (select actor_id from tb_video_actor where video_id = #{id} ) " ,
+            "<if test='type ==\"next\"'>",
+            " ORDER BY vio.id",
+            "</if>",
+            "<if test='type ==\"pre\"'>",
+            " ORDER BY vio.id desc",
+            "</if>",
+            " LIMIT 0,1",
+            "</script>"
+    })
+    @Results({
+            @Result(column = "id", property = "id", jdbcType = JdbcType.INTEGER, id = true),
+            @Result(column = "name", property = "name", jdbcType = JdbcType.VARCHAR),
+
+            @Result(column = "video_url", property = "videoUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "cover_url", property = "coverUrl", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "creat_time", property = "creatTime", jdbcType = JdbcType.TIMESTAMP),
+            @Result(column = "creater", property = "creater", jdbcType = JdbcType.VARCHAR),
+            @Result(column = "type", property = "type", jdbcType = JdbcType.INTEGER),
+            @Result(column = "exist", property = "exist", jdbcType = JdbcType.INTEGER),
+            @Result(column = "remark", property = "remark", jdbcType = JdbcType.VARCHAR)
+    })
+    Video findFirstJapan(@Param("id")Integer id, @Param("type")String type);
 }

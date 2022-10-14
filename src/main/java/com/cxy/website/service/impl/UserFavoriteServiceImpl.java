@@ -89,14 +89,14 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 if(picture==null){
                     continue;
                 }
-                picture = pictureService.getPicture(picture, picture.getId());
+                picture = pictureService.getPicture(picture, picture.getId(), null);
                 userFavorite.setPicture(picture);
             }else{
                 Video video = videoService.findByid(userFavorite.getVideoId());
                 if(video==null){
                     continue;
                 }
-                video = videoService.getVideo(video, video.getId());
+                video = videoService.getVideo(video, video.getId(), null);
                 userFavorite.setVideo(video);
             }
         }
